@@ -47,6 +47,7 @@ export function extractFilenameFromUrl(input) {
  */
 export const KNOWN_CDNS = [
   { key: 'slicedrive', name: 'Slicedrive', base: 'https://cdn.slicedrive.com' },
+  { key: 'videy',      name: 'Videy',      base: 'https://cdn.videy.co' },
   { key: 'videy',      name: 'Videy',      base: 'https://cdn2.videy.co' },
   { key: 'aceimg',     name: 'Aceimg',     base: 'https://cdn.aceimg.com' },
   { key: 'xxfollow',   name: 'Xxfollow',   base: 'https://www.xxxfollow.com' },
