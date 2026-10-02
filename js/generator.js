@@ -15,9 +15,9 @@ import {
   formatTimeAgo,
   showToast,
   copyText
-} from './utils.js?v=55';
-import { isDbReady, getDb, getDomains } from './db/index.js?v=55';
-import History, { ShortStore } from './storage.js?v=55';
+} from './utils.js?v=57';
+import { isDbReady, getDb, getDomains } from './db/index.js?v=57';
+import History, { ShortStore } from './storage.js?v=57';
 
 export function renderGenerator(container) {
   var domain = getDomain();

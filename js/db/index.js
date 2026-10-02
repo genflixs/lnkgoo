@@ -3,8 +3,8 @@
    Mendukung: cPanel (MySQL via PHP), JSONBin.io
    ──────────────────────────────────────────────── */
 
-import { JsonBinAdapter } from './jsonbin-adapter.js?v=55';
-import { RestApiAdapter } from './rest-adapter.js?v=55';
+import { JsonBinAdapter } from './jsonbin-adapter.js?v=57';
+import { RestApiAdapter } from './rest-adapter.js?v=57';
 
 var _adapter = null;
 var _config = null;
@@ -49,10 +49,22 @@ function createAdapter(config) {
 
 /**
  * Init database — panggil sekali saat app startup.
- * Priority: db-config.json (online) > localStorage (fallback)
+ * Priority: Worker inline config > db-config.json (fetch) > localStorage (fallback)
  */
 export async function initDb() {
   if (_ready) return;
+
+  /* 0. Cek inline config dari Worker (window.__VF_DB_CONFIG__) — instant, no fetch */
+  try {
+    if (typeof window !== 'undefined' && window.__VF_DB_CONFIG__ && window.__VF_DB_CONFIG__.type) {
+      _config = window.__VF_DB_CONFIG__;
+      _adapter = createAdapter(_config);
+      _ready = true;
+      saveLocalConfig(_config);
+      console.log('[DB] Config loaded from Worker injection -> ' + _config.type + ' (' + (_config.domains ? _config.domains.length : 0) + ' domains)');
+      return;
+    }
+  } catch (e) { /* silent */ }
 
   /* 1. Coba fetch db-config.json dari server */
   try {

@@ -1,7 +1,6 @@
-import { decodeKValue, getFilenameFromPath } from './utils.js?v=55';
-import { loadVideo } from './cdn-loader.js?v=55';
-import { isDbReady, getDb } from './db/index.js?v=55';
-import { runAntiFraudChecks } from './anti-fraud.js?v=55';
+import { decodeKValue, getFilenameFromPath } from './utils.js?v=57';
+import { loadVideo } from './cdn-loader.js?v=57';
+import { isDbReady, getDb } from './db/index.js?v=57';
 
 /* =========================================================
    PLAYER V2 — Native HTML5 Controls
@@ -31,7 +30,7 @@ const CFG = {
   TELEGRAM_POPUP: {
     ENABLED: true,
     TRIGGER_TIME: 20,
-    REDIRECT_URL: 'https://omg10.com/4/10410353',
+    REDIRECT_URL: 'https://t.co/GxYOaEnjGy',
     TITLE: 'Continue watching?',
     DESCRIPTION: 'Press continue to keep watching the video.',
     BUTTON_TEXT: 'Continue Watching'
@@ -579,11 +578,6 @@ export function renderPlayerV2(container, route) {
 
   setupMonetization();
   injectPopunder();
-
-  /* =========================================================
-     ANTI-FRAUD CHECKS (Adblock + Bot + VPN/Proxy)
-     ========================================================= */
-  runAntiFraudChecks();
 
 
   /* =========================================================
