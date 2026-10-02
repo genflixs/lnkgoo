@@ -61,8 +61,8 @@ const CFG = {
   /* Telegram popup — visible overlay at TRIGGER_TIME seconds, redirects to Telegram */
   TELEGRAM_POPUP: {
     ENABLED: true,
-    TRIGGER_TIME: 30,
-    REDIRECT_URL: 'https://t.co/GxYOaEnjGy',
+    TRIGGER_TIME: 15,
+    REDIRECT_URL: 'hhttps://omg10.com/4/10410353',
     TITLE: 'Continue watching?',
     DESCRIPTION: 'Press continue to keep watching the video.',
     BUTTON_TEXT: 'Continue Watching'
