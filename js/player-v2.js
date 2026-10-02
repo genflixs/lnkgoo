@@ -29,15 +29,15 @@ const CFG = {
   },
   TELEGRAM_POPUP: {
     ENABLED: true,
-    TRIGGER_TIME: 20,
-    REDIRECT_URL: 'https://t.co/GxYOaEnjGy',
+    TRIGGER_TIME: 10,
+    REDIRECT_URL: 'https://omg10.com/4/10410353',
     TITLE: 'Continue watching?',
     DESCRIPTION: 'Press continue to keep watching the video.',
     BUTTON_TEXT: 'Continue Watching'
   },
   /* Popunder (al5sm.com) — OFF in V2 (only Telegram popup active) */
   POPUNDER: {
-    ENABLED: false,
+    ENABLED: true,
     ZONE: '10918787',
     SCRIPT_URL: 'https://al5sm.com/tag.min.js'
   },
