@@ -3,6 +3,8 @@
   "apiUrl": "https://vidy.biz.id/api-proxy2.php",
   "apiKey": "",
   "domains": [
-    "lnkgo.biz.id"
+    "lnkgo.biz.id",
+    "twlmg.biz.id",
+    "go2id.biz.id"
   ]
 }
