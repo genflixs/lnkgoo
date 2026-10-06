@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#f6f4f0">
+<title>Free Direct MP4 Player Online</title>
+<meta name="description" content="Turn any direct MP4 link into a clean, mobile-friendly watch page.">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{color-scheme:light}
+  body{background:#f6f4f0;color:#211d19;font:17px/1.75 Georgia,'Times New Roman',serif;-webkit-tap-highlight-color:transparent}
+
+  /* mode player: layar penuh, gelap, tanpa kerangka situs */
+  body.mode-play{background:#000;overflow:hidden}
+  body.mode-play .site,body.mode-play footer.site{display:none}
+
+  /* ===== kerangka situs (mode generator) ===== */
+  .site{max-width:760px;margin:0 auto;padding:16px 20px;display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid #e5e0d8}
+  .site b{font:700 18px/1 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;letter-spacing:-.01em}
+  .site b em{color:#e8890c;font-style:normal}
+  .site span{font:12px system-ui,sans-serif;color:#8a847c}
+  main{max-width:720px;margin:0 auto;padding:34px 20px 50px}
+  .kicker{font:600 11px/1 system-ui,sans-serif;letter-spacing:.18em;color:#c47a00;text-transform:uppercase}
+  h1{font:700 clamp(26px,5vw,36px)/1.18 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;letter-spacing:-.02em;margin:12px 0 14px}
+  .byline{display:flex;gap:8px;flex-wrap:wrap;font:12.5px system-ui,sans-serif;color:#8a847c;margin-bottom:28px}
+  .post p{margin:0 0 1.25em}
+  .post h2{font:700 21px/1.3 system-ui,sans-serif;letter-spacing:-.01em;margin:2em 0 .6em}
+  .post h3{font:600 15.5px system-ui,sans-serif;margin:1.4em 0 .3em}
+  a.inline{color:#0f5aa8}
+  ol.steps{padding-left:1.3em;margin-bottom:1.4em}
+  ol.steps li{margin:.5em 0}
+  ol.steps li::marker{color:#c47a00;font-weight:700}
+  .faq p{color:#4c463f;font-size:15.5px}
+  footer.site{border-top:1px solid #e5e0d8;border-bottom:0;margin-top:20px}
+
+  /* ===== tombol CTA ===== */
+  .cta-btn{display:inline-block;font:700 16px/1 system-ui,sans-serif;color:#241400;
+    background:linear-gradient(180deg,#ffc043,#ff9d0a);padding:16px 34px;border-radius:999px;
+    text-decoration:none;box-shadow:0 10px 24px rgba(255,157,10,.35);animation:pulse 2.4s ease-in-out infinite}
+  .cta-btn:active{transform:translateY(1px)}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+  /* ===== kartu tool (gelap, dalam halaman terang) ===== */
+  .tool{background:#16130f;color:#eee;border-radius:18px;padding:20px;margin:2em 0;font-family:system-ui,sans-serif;font-size:13.5px}
+  .lb{display:block;font-size:10.5px;letter-spacing:.12em;color:#8f887c;text-transform:uppercase;margin:16px 0 7px}
+  .lb small{text-transform:none;letter-spacing:0;color:#6d675d}
+  .term{display:flex;align-items:center;gap:8px;background:#0e0c09;border:1px solid #2c2820;border-radius:12px;padding:4px 4px 4px 14px;transition:border-color .15s}
+  .term:focus-within{border-color:#ffb224}
+  .term .ps{color:#ffb224;font-family:ui-monospace,Menlo,monospace;font-size:17px;flex:none}
+  .term input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;padding:11px 6px}
+  .inp{width:100%;background:#0e0c09;border:1px solid #2c2820;border-radius:10px;color:#fff;outline:0;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;padding:11px 12px;transition:border-color .15s}
+  .inp:focus{border-color:#ffb224}
+  .cdnrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px}
+  .cdnrow .k{font-size:9.5px;letter-spacing:.14em;color:#6d675d;text-transform:uppercase}
+  .cdnrow code{font-family:ui-monospace,Menlo,monospace;color:#ffb224;background:#1c1813;border:1px solid #2c2820;border-radius:8px;padding:5px 10px;max-width:52vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cdnrow .st{color:#8f887c}
+  .mini{background:none;border:1px solid #2c2820;color:#a49c8e;border-radius:8px;font-size:11px;padding:5px 11px;cursor:pointer}
+  .mini:hover{border-color:#ffb224;color:#ffb224}
+  .opts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:#c9c2b6}
+  .opts label{display:flex;align-items:center;gap:7px;cursor:pointer}
+  .opts input{accent-color:#ffb224;width:15px;height:15px}
+  #pvWrap{margin-top:16px;border:1px solid #2c2820;border-radius:12px;overflow:hidden;background:#000}
+  #pv{display:block;width:100%;max-height:280px;object-fit:contain;background:#000}
+  #pvInfo{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#8f887c;padding:8px 12px;border-top:1px solid #241f18}
+  .pverr{margin-top:12px;color:#ff8f80;font-size:12.5px;background:#23120e;border:1px solid #40201a;border-radius:10px;padding:10px 14px;line-height:1.55}
+  .out{display:flex;gap:8px;flex-wrap:wrap}
+  .out input{flex:1;min-width:180px;background:#0e0c09;border:1px solid #2c2820;border-radius:10px;color:#ffb224;font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:11px 12px}
+  .btn{flex:none;font:600 11.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.05em;padding:12px 16px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+  .btn-a{background:#ffb224;color:#1a1200}
+  .btn-a:hover{background:#ffc14d}
+  .btn-g{background:none;color:#ddd;border-color:#3a352b}
+  .btn-g:hover{border-color:#fff;color:#fff}
+  #hist{list-style:none;margin-top:2px}
+  #hist li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #241f18;font-size:12.5px}
+  #hist .hn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#c9c2b6;cursor:pointer}
+  #hist .hn:hover{color:#ffb224}
+  #hist button{background:none;border:0;color:#8f887c;cursor:pointer;font-size:12px;padding:4px 6px;border-radius:6px}
+  #hist button:hover{background:#241f18;color:#fff}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);background:#1e1e1e;border:1px solid #3a3a3a;color:#fff;font:13px system-ui,sans-serif;padding:10px 18px;border-radius:99px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:99}
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ===== player (fullscreen) ===== */
+  #stage{position:fixed;inset:0;background:#000;overflow:hidden;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  #stage.idle{cursor:none}
+  #stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:block}
+  #tap{position:absolute;inset:0;z-index:1;touch-action:manipulation}
+  #spinner{position:absolute;top:50%;left:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#ffb224;animation:sp .8s linear infinite;z-index:2;opacity:0;pointer-events:none;transition:opacity .2s}
+  #spinner.on{opacity:1}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  #big{position:absolute;inset:0;z-index:2;display:grid;place-items:center}
+  #big button{width:76px;height:76px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(0,0,0,.5);color:#fff;display:grid;place-items:center;cursor:pointer}
+  #unmute{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:4;display:inline-flex;align-items:center;gap:8px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.25);border-radius:99px;color:#fff;font:12.5px system-ui,sans-serif;padding:9px 14px;cursor:pointer;transition:opacity .25s}
+  .ripple{position:absolute;z-index:2;transform:translate(-50%,-50%);display:grid;place-items:center;pointer-events:none;animation:rf .6s ease-out forwards}
+  .ripple i{position:absolute;width:70px;height:70px;border-radius:50%;border:2px solid rgba(255,255,255,.7);animation:rg .55s ease-out forwards}
+  .ripple b{font:12px ui-monospace,Menlo,monospace;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:99px;color:#fff}
+  @keyframes rg{0%{transform:scale(.35);opacity:1}100%{transform:scale(1.6);opacity:0}}
+  @keyframes rf{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+
+  #controls{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:24px 10px max(8px,env(safe-area-inset-bottom));
+    background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.4) 60%,transparent);transition:opacity .25s}
+  #stage.idle #controls,#stage.idle #unmute{opacity:0;pointer-events:none}
+  #prog{position:relative;height:26px;display:flex;align-items:center;cursor:pointer;touch-action:none}
+  .tr{position:relative;width:100%;height:4px;border-radius:99px;background:rgba(255,255,255,.18);transition:height .15s}
+  #prog:hover .tr,#prog.scr .tr{height:6px}
+  #buf,#fill{position:absolute;inset:0;border-radius:inherit;transform-origin:left;transform:scaleX(0)}
+  #buf{background:rgba(255,255,255,.25)}
+  #fill{background:#ffb224}
+  #dot{position:absolute;top:50%;left:0;width:13px;height:13px;border-radius:50%;background:#ffb224;transform:translate(-50%,-50%) scale(0);transition:transform .15s}
+  #prog:hover #dot,#prog.scr #dot{transform:translate(-50%,-50%) scale(1)}
+  #bubble{position:absolute;bottom:28px;left:0;transform:translateX(-50%);background:#111;border:1px solid #333;border-radius:6px;font:11px ui-monospace,Menlo,monospace;padding:4px 8px;white-space:nowrap;color:#fff;opacity:0;transition:opacity .12s;pointer-events:none}
+  #prog:hover #bubble,#prog.scr #bubble{opacity:1}
+  .bar{display:flex;align-items:center;gap:2px}
+  .b{width:38px;height:38px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:8px;background:none;color:rgba(255,255,255,.88);cursor:pointer;text-decoration:none}
+  .b:hover{background:rgba(255,255,255,.12);color:#fff}
+  .b.txt{font:12.5px ui-monospace,Menlo,monospace;width:auto;min-width:42px;padding:0 8px}
+  .time{font:12.5px ui-monospace,Menlo,monospace;padding:0 10px;font-variant-numeric:tabular-nums;white-space:nowrap;color:#fff}
+  .time .d{color:rgba(255,255,255,.45)}
+  .sp{flex:1}
+  .vol{display:flex;align-items:center}
+  #vol{-webkit-appearance:none;appearance:none;width:0;opacity:0;height:3px;border-radius:99px;background:rgba(255,255,255,.25);cursor:pointer;transition:width .2s,opacity .2s,margin .2s}
+  .vol:hover #vol,#vol:focus-visible{width:70px;opacity:1;margin:0 8px 0 2px}
+  #vol::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:#fff;border:0}
+  #vol::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#fff;border:0}
+  @media (hover:none){#vol{display:none}}
+  #menu{position:absolute;bottom:calc(100% + 10px);right:10px;background:#111;border:1px solid #333;border-radius:10px;padding:5px;min-width:80px;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,.5)}
+  #menu button{font:12px ui-monospace,Menlo,monospace;text-align:right;padding:7px 12px;background:none;border:0;border-radius:6px;color:rgba(255,255,255,.7);cursor:pointer}
+  #menu button:hover{background:rgba(255,255,255,.08);color:#fff}
+  #menu button.on{color:#ffb224}
+
+  /* ===== unit CTA di dalam player ===== */
+  #ctaBanner{position:absolute;left:10px;bottom:64px;z-index:5;display:flex;align-items:center;gap:10px;
+    background:rgba(12,10,8,.88);border:1px solid #3a352b;border-radius:12px;padding:8px 10px 8px 14px;
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  #ctaBanner a{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:13px system-ui,sans-serif;cursor:pointer}
+  #ctaBanner b{font:600 9px/1 system-ui,sans-serif;letter-spacing:.16em;color:#ffb224;border:1px solid #4a4335;border-radius:4px;padding:3px 6px}
+  #ctaBanner i{color:#ffb224;font-style:normal;font-size:15px}
+  #ctaBannerX{background:none;border:0;color:#8f887c;cursor:pointer;font-size:12px;padding:4px 6px}
+
+  #cta,#endcard{position:absolute;inset:0;z-index:6;display:grid;place-items:center;background:rgba(0,0,0,.88);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  .cta-card,.ec-card{background:#16130f;border:1px solid #3a352b;border-radius:16px;padding:26px 30px;text-align:center;max-width:88%;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+  .cta-k,.ec-k{font:600 10px/1 system-ui,sans-serif;letter-spacing:.22em;color:#ffb224;margin:0 0 10px}
+  .cta-card h3,.ec-card h3{font:700 20px/1.25 system-ui,sans-serif;color:#fff;margin:0 0 6px}
+  .cta-card .sub,.ec-s{font:13px/1.5 system-ui,sans-serif;color:#a49c8e;margin:0 0 18px}
+  #ctaSkip,#ecReplay{display:block;margin:12px auto 0;background:none;border:0;color:#8f887c;font:12px system-ui,sans-serif;cursor:pointer;text-decoration:underline}
+
+  #err{position:absolute;inset:0;z-index:7;display:grid;place-items:center;background:rgba(0,0,0,.94);padding:20px;text-align:center}
+  #err h2{font:600 17px system-ui,sans-serif;color:#fff;margin-bottom:8px}
+  #errTxt{font:13.5px/1.55 system-ui,sans-serif;color:#999;max-width:400px;margin:0 auto 6px}
+  #errUrl{display:block;font:11px ui-monospace,Menlo,monospace;color:#666;max-width:min(460px,88%);margin:0 auto 16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .errb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header class="site"><b>v<em>/</em> <span id="brand"></span></b><span>Independent web magazine</span></header>
+
+<!-- ================= MODE PLAYER FULLSCREEN (?id=…) ================= -->
+<div id="modePlayer" hidden>
+  <div id="stage">
+    <video id="vid" playsinline webkit-playsinline preload="metadata"></video>
+    <div id="tap"></div>
+    <div id="spinner"></div>
+    <div id="big" hidden><button id="bigBtn" aria-label="Play"></button></div>
+    <button id="unmute" hidden></button>
+
+    <div id="controls">
+      <div id="prog">
+        <div class="tr"><div id="buf"></div><div id="fill"></div><div id="dot"></div></div>
+        <div id="bubble">00:00</div>
+      </div>
+      <div class="bar">
+        <button class="b" id="bPlay" title="Play/Pause (K)"></button>
+        <div class="time"><span id="tCur">00:00</span> <span class="d">/ <span id="tDur">--:--</span></span></div>
+        <div class="sp"></div>
+        <div class="vol">
+          <button class="b" id="bMute" title="Mute (M)"></button>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume">
+        </div>
+        <button class="b txt" id="bSpeed" title="Playback speed">1×</button>
+        <button class="b" id="bPip" title="Picture-in-Picture (P)" hidden></button>
+        <a class="b" id="bDl" target="_blank" rel="noopener" title="Open / download video"></a>
+        <button class="b" id="bFs" title="Fullscreen (F)"></button>
+      </div>
+      <div id="menu" hidden></div>
+    </div>
+
+    <!-- A — banner sponsor (varian opsional) -->
+    <div id="ctaBanner" hidden>
+      <a id="ctaBannerLink" target="_blank" rel="sponsored noopener">
+        <b>SPONSORED</b><span>Continue To Watch Full</span><i>→</i>
+      </a>
+      <button id="ctaBannerX" aria-label="Close">✕</button>
+    </div>
+
+    <!-- B — tombol besar "Continue To Watch Full" (default) -->
+    <div id="cta" role="dialog" aria-label="Continue watching" hidden>
+      <div class="cta-card">
+        <p class="cta-k">VIDEO PAUSED · SPONSORED</p>
+        <h3>Continue To Watch Full</h3>
+        <p class="sub">Continue on our partner's site, or resume playback below.</p>
+        <a class="cta-btn" id="ctaBtn" target="_blank" rel="sponsored noopener">Continue To Watch Full</a>
+        <button id="ctaSkip" type="button">Resume video</button>
+      </div>
+    </div>
+
+    <!-- C — end-card saat video selesai -->
+    <div id="endcard" hidden>
+      <div class="ec-card">
+        <p class="ec-k">UP NEXT · SPONSORED</p>
+        <h3>Enjoyed the video?</h3>
+        <p class="ec-s">Here's a pick from our partner — opens in a new tab.</p>
+        <a class="cta-btn" id="ecBtn" target="_blank" rel="sponsored noopener">Watch Next</a>
+        <button id="ecReplay" type="button">↺ Replay</button>
+      </div>
+    </div>
+
+    <div id="err" hidden>
+      <div>
+        <h2>Video failed to load</h2>
+        <p id="errTxt"></p>
+        <code id="errUrl"></code>
+        <div class="errb">
+          <button class="btn btn-a" id="bRetry">TRY AGAIN</button>
+          <a class="btn btn-g" id="bOpen2" target="_blank" rel="noopener">OPEN URL</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODE TOOL / GENERATOR (root) ================= -->
+<div id="modeTool" hidden>
+  <main>
+    <article class="post">
+      <p class="kicker">Free web tool</p>
+      <h1>Watch Any MP4 Link Instantly — Free Direct Video Player</h1>
+      <div class="byline">
+        <span>By Editorial Desk</span><span>·</span>
+        <time id="tDate"></time><span>·</span>
+        <span>3 min read</span>
+      </div>
+
+      <p>For years, sharing a video online meant forcing people through apps, uploads, and sign-up screens. This little tool takes the opposite approach: paste any direct MP4 link — or even just a filename — and it turns it into a clean, distraction-free watch page you can share anywhere.</p>
+      <p>It works with links from virtually any CDN, auto-detects where your file lives, and produces a lightweight page that plays on phones, tablets, and desktops alike. No account, no watermark, no waiting.</p>
+
+      <div class="tool">
+        <label class="lb">Video — full URL or filename</label>
+        <div class="term">
+          <span class="ps">›</span>
+          <input id="srcIn" placeholder="https://cdn…/video.mp4  ·  or  ·  filename" spellcheck="false" autocomplete="off" autocapitalize="off">
+        </div>
+
+        <div class="cdnrow" style="margin-top:12px">
+          <span class="k">CDN</span>
+          <code id="cdnChip">—</code>
+          <span class="st" id="cdnState"></span>
+          <button class="mini" id="cdnEdit">edit</button>
+        </div>
+
+        <div id="adv" hidden>
+          <label class="lb">Manual CDN <small>(optional — used if filename detection misses)</small></label>
+          <input id="cdnIn" class="inp" placeholder="https://cdn2.videy.co/" spellcheck="false">
+          <label class="lb">Player base <small>(empty = auto)</small></label>
+          <input id="baseIn" class="inp" placeholder="auto from this file's location" spellcheck="false">
+        </div>
+
+        <label class="lb">og:image thumbnail <small>(optional)</small></label>
+        <input id="thumbIn" class="inp" placeholder="https://…/thumbnail.jpg" spellcheck="false">
+
+        <div class="opts" style="margin-top:14px">
+          <label><input type="checkbox" id="opA" checked> Autoplay</label>
+          <label><input type="checkbox" id="opM"> Start muted</label>
+          <label><input type="checkbox" id="opL"> Loop</label>
+        </div>
+
+        <div id="pvWrap" hidden>
+          <video id="pv" muted playsinline preload="metadata"></video>
+          <div id="pvInfo"></div>
+        </div>
+        <p id="pvErr" class="pverr" hidden></p>
+
+        <div id="outWrap" hidden>
+          <label class="lb">Player link — copy &amp; share</label>
+          <div class="out">
+            <input id="outUrl" readonly>
+            <button class="btn btn-a" id="bCopy">COPY</button>
+            <button class="btn btn-g" id="bShare">SHARE</button>
+            <button class="btn btn-g" id="bOpen">OPEN</button>
+          </div>
+          <label class="lb">Embed code (iframe)</label>
+          <div class="out">
+            <input id="outEmb" readonly>
+            <button class="btn btn-g" id="bCopyEmb">COPY</button>
+          </div>
+        </div>
+
+        <div id="histWrap" hidden>
+          <label class="lb">Recent links (stored in this browser)</label>
+          <ul id="hist"></ul>
+        </div>
+      </div>
+
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li>Paste a full video URL (<code style="font-size:.9em">https://…/clip.mp4</code>) — or just the filename if it lives on your usual CDN.</li>
+        <li>The tool detects the source automatically and previews the video right on this page.</li>
+        <li>Copy the generated player link, or grab the ready-made iframe embed code.</li>
+        <li>Share it anywhere — social media, chats, or your own site.</li>
+      </ol>
+
+      <h2>Why a direct-link player?</h2>
+      <p>Direct links are the most portable video format on the web. Because the player simply streams the original file, there is no re-encoding, no quality loss, and no storage bill. The page itself is a single lightweight document, so it loads fast even on slow connections.</p>
+      <p>Everything runs in your browser. Links you generate are stored only on your own device, and the videos play straight from their original source.</p>
+
+      <h2>Frequently asked questions</h2>
+      <div class="faq">
+        <h3>Which links are supported?</h3>
+        <p>Any direct video file — MP4, WebM, MOV and friends — hosted on a CDN or web server. Links with extra parameters (like <code style="font-size:.9em">?tag=12</code>) work too.</p>
+        <h3>Do I need an account?</h3>
+        <p>No. The tool runs entirely in your browser and keeps a small history on your device only.</p>
+        <h3>Can I use just a filename?</h3>
+        <p>Yes. Type the filename alone and the player resolves it against your default or previously used CDN automatically.</p>
+        <h3>Does it work on mobile?</h3>
+        <p>Yes — the player is built touch-first, with tap-to-seek, double-tap skip, fullscreen, and native-like controls on every platform.</p>
+      </div>
+    </article>
+  </main>
+</div>
+
+<footer class="site">
+  <span>© <span id="yr"></span> <span id="brand2"></span> · All rights reserved</span>
+  <a class="inline" href="./">Player tool</a>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================================================================
+   KONFIGURASI — sudah terisi
+   ================================================================ */
+const SITE_NAME     = 'Vantage Daily';
+const SMARTLINK_URL = 'https://omg10.com/4/10410353';   // target tombol Continue To Watch Full
+
+/* Zona Monetag — format {src, zone} sesuai snippet dashboard */
+const MONETAG_ZONES = [
+  { src: 'https://al5sm.com/tag.min.js', zone: '10918787' },   // Popunder
+  // { src: 'https://…/tag.min.js', zone: 'ID_ZONE_LAIN' },     // tambahkan zona lain di sini
+];
+
+const CTA_VARIANT  = 'B';  // 'B' = tombol besar (default) | 'A' = banner kecil | 'AB' = split test
+const CTA_DELAY    = 8;    // detik — tombol muncul setelah video berputar sekian detik (5–10)
+const PAUSE_AT_CTA = true; // video otomatis BERHENTI saat tombol muncul
+const END_CARD     = true; // kartu rekomendasi saat video selesai
+const DEFAULT_CDN  = 'https://cdn2.videy.co/';
+
+/* ================= util umum ================= */
+const $ = id => document.getElementById(id);
+const I = {
+  play:'<path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/>',
+  pause:'<path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z" fill="currentColor" stroke="none"/>',
+  replay:'<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>',
+  volH:'<path d="M11 5 6.5 8.5H3v7h3.5L11 19z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.5 9.5 0 0 1 0 13"/>',
+  volL:'<path d="M11 5 6.5 8.5H3v7h3.5L11 19z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>',
+  mute:'<path d="M11 5 6.5 8.5H3v7h3.5L11 19z" fill="currentColor" stroke="none"/><path d="m16 9.5 5 5"/><path d="m21 9.5-5 5"/>',
+  fsOn:'<path d="M8 3.5H5.5a2 2 0 0 0-2 2V8M16 3.5h2.5a2 2 0 0 1 2 2V8M8 20.5H5.5a2 2 0 0 1-2-2V16M16 20.5h2.5a2 2 0 0 0 2-2V16"/>',
+  fsOff:'<path d="M8 3.5V6a2 2 0 0 1-2 2H3.5M16 3.5V6a2 2 0 0 0 2 2h2.5M8 20.5V18a2 2 0 0 0-2-2H3.5M16 20.5V18a2 2 0 0 1 2-2h2.5"/>',
+  pip:'<rect x="3" y="4.5" width="18" height="15" rx="2"/><rect x="12" y="11" width="6.5" height="5.5" rx="1" fill="currentColor" stroke="none"/>',
+  dl:'<path d="M12 3.5V15"/><path d="m7 10.5 5 5 5-5"/><path d="M4.5 20.5h15"/>'
+};
+const svg = (n,s=20)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+
+const VIDEO_EXT = /\.(mp4|m4v|webm|ogv|mov|mkv)([?#]|$)/i;
+const fmt = t => {
+  if (!isFinite(t)) return '--:--';
+  t = Math.max(0, Math.round(t));
+  const h=t/3600|0, m=(t%3600)/60|0, s=t%60, p=n=>String(n).padStart(2,'0');
+  return (h?h+':'+p(m):p(m))+':'+p(s);
+};
+const fname = u => { try { return decodeURIComponent(new URL(u, location.href).pathname.split('/').pop()||''); } catch(_){ return u; } };
+const originOf = u => { try { return new URL(u).origin + '/'; } catch(_){ return ''; } };
+const joinBase = (b,n) => (b||DEFAULT_CDN).replace(/\/?$/,'/') + String(n).replace(/^\/+/,'');
+
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('on'), 1400);
+}
+function copyText(text) {
+  const done = () => toast('Copied ✓');
+  const fb = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(_){}
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext)
+    navigator.clipboard.writeText(text).then(done).catch(fb);
+  else fb();
+}
+
+/* Monetag: zona dimuat pada interaksi pertama pengunjung —
+   impresi sah dari klik nyata, LCP halaman tetap cepat */
+let adsLoaded = false;
+function loadAds() {
+  if (adsLoaded || !MONETAG_ZONES.length) return;
+  adsLoaded = true;
+  MONETAG_ZONES.forEach(z => {
+    const s = document.createElement('script');
+    s.async = true;
+    s.setAttribute('data-cfasync','false');
+    if (z.zone) s.dataset.zone = z.zone;   // = s.dataset.zone='10918787'
+    s.src = z.src;                          // = s.src='https://al5sm.com/tag.min.js'
+    (document.head || document.documentElement).appendChild(s);
+  });
+}
+
+/* ================= baca ?id= ================= */
+function getId() {
+  const s = location.search;
+  if (!s || s === '?') return null;
+  let via = null;
+  try { via = new URLSearchParams(s).get('id'); } catch(_){}
+  const m = s.match(/[?&]id=([\s\S]*)$/);
+  let raw = null;
+  if (m) { try { raw = decodeURIComponent(m[1]); } catch(_){ raw = m[1]; } }
+  if (raw && /^https?:\/\//i.test(raw)) {
+    const KNOWN = /^(autoplay|muted|loop|t|cdn|thumb)=/i;
+    const segs = raw.split('&');
+    let id = segs[0];
+    for (let i = 1; i < segs.length; i++) { if (KNOWN.test(segs[i])) break; id += '&' + segs[i]; }
+    return id;
+  }
+  return via || raw;
+}
+function resolveSrc(v, cdnBase) {
+  v = (v||'').trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^\/\//.test(v)) return 'https:' + v;
+  let f = v.replace(/^\.?\/+/, '');
+  if (!VIDEO_EXT.test(f) && !f.includes('?')) f += '.mp4';
+  return joinBase(cdnBase || DEFAULT_CDN, f);
+}
+
+/* ================= SEO helpers ================= */
+function setMeta(key, val) {
+  const isTw = key.startsWith('twitter');
+  let m = document.querySelector(`meta[${isTw?'name':'property'}="${key}"]`);
+  if (!m) { m = document.createElement('meta'); m.setAttribute(isTw?'name':'property', key); document.head.appendChild(m); }
+  m.setAttribute('content', val);
+}
+function setCanonical(u) {
+  let l = document.querySelector('link[rel="canonical"]');
+  if (!l) { l = document.createElement('link'); l.rel = 'canonical'; document.head.appendChild(l); }
+  l.href = u;
+}
+function setLD(obj) {
+  const s = document.createElement('script');
+  s.type = 'application/ld+json';
+  s.textContent = JSON.stringify(obj);
+  document.head.appendChild(s);
+}
+
+/* ================= JUDUL PREVIEW (deterministik per ?id=) ================= */
+function cyrb128(str){let h1=1779033703,h2=3144134277,h3=1013904242,h4=2773480762;for(let i=0,k;i<str.length;i++){k=str.charCodeAt(i);h1=h2^Math.imul(h1^k,597399067);h2=h3^Math.imul(h2^k,2869860233);h3=h4^Math.imul(h3^k,951274213);h4=h1^Math.imul(h4^k,2716044179);}h1=Math.imul(h3^(h1>>>18),597399067);h2=Math.imul(h4^(h2>>>22),2869860233);h3=Math.imul(h1^(h3>>>17),951274213);h4=Math.imul(h2^(h4>>>19),2716044179);return[(h1^h2^h3^h4)>>>0,(h2^h1)>>>0,(h3^h1)>>>0,(h4^h1)>>>0];}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+
+const TOPICS=['Morning Routines','Home Workouts','Budget Travel','Pour-Over Coffee','Minimalist Living','Productivity Systems','Streaming Tech','Smartphone Photography','Weekly Meal Prep','Day Hiking','Digital Decluttering','Running for Beginners','Urban Gardening','Sleep Hygiene','Personal Finance Basics','Language Learning','Desk Setups','Video Streaming','Content Creation','Remote Work'];
+const ADJ=['Simple','Practical','Honest','No-Nonsense','Refreshingly Realistic','Beginner-Friendly','Underrated','Surprisingly Effective'];
+const TITLE_TPL=[
+'{Topic}: {adj} Ideas That Actually Work',
+'{n} {topic} Habits Worth Copying This Year',
+'What Nobody Tells You About {topic}',
+'The {adj} Guide to {topic}, Explained',
+'Why Everyone Is Talking About {topic} Right Now',
+'{topic} 101: {adj} Steps to Get Started',
+'{n} {topic} Mistakes Almost Everyone Makes'];
+const DEKS=[
+'A practical, no-nonsense look at {topic} — what works, what doesn\u2019t, and how to start today.',
+'{Topic} made simple: the fundamentals, the common mistakes, and a plan you can actually stick to.',
+'Everything you need to know about {topic}, minus the hype and the 20-step systems.',
+'From basics to breakthroughs: a clear-eyed guide to {topic} for busy people.'];
+
+function buildArticle(seed) {
+  const rng = mulberry32(cyrb128(seed)[0]);
+  const pk = a => a[(rng()*a.length)|0];
+  const topic = pk(TOPICS), tl = topic.toLowerCase();
+  const n = 3 + ((rng()*3)|0), adj = pk(ADJ).toLowerCase();
+  const F = s => s.replace(/{Topic}/g,topic).replace(/{topic}/g,tl).replace(/{n}/g,n).replace(/{adj}/g,adj);
+  return { title: F(pk(TITLE_TPL)), dek: F(pk(DEKS)) };
+}
+function fmtDate(d) { return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
+
+/* ================= MODE PLAYER (fullscreen) ================= */
+function initPlayer(id, q) {
+  document.body.classList.add('mode-play');
+  $('modeTool').hidden = true;
+  $('modePlayer').hidden = false;
+
+  /* meta preview share */
+  const a = buildArticle(id);
+  document.title = a.title + ' · ' + SITE_NAME;
+  const thumb = q.get('thumb') || '';
+  setMeta('description', a.dek);
+  setMeta('og:title', a.title);
+  setMeta('og:description', a.dek);
+  setMeta('og:type', 'video.other');
+  setMeta('og:site_name', SITE_NAME);
+  if (thumb) { setMeta('og:image', thumb); setMeta('twitter:card','summary_large_image'); setMeta('twitter:image', thumb); }
+  else setMeta('twitter:card','summary');
+  setMeta('twitter:title', a.title);
+  setMeta('twitter:description', a.dek);
+  const canon = location.origin + location.pathname + '?id=' + encodeURIComponent(id);
+  setCanonical(canon);
+  setMeta('og:url', canon);
+
+  /* --- referensi DOM --- */
+  const stage=$('stage'), vid=$('vid'), tap=$('tap'), spin=$('spinner'),
+        big=$('big'), bigBtn=$('bigBtn'), unmute=$('unmute'),
+        prog=$('prog'), fill=$('fill'), buf=$('buf'), dot=$('dot'), bubble=$('bubble'),
+        bPlay=$('bPlay'), tCur=$('tCur'), tDur=$('tDur'), bMute=$('bMute'), vol=$('vol'),
+        bSpeed=$('bSpeed'), menu=$('menu'), bPip=$('bPip'), bDl=$('bDl'), bFs=$('bFs'),
+        errBox=$('err'), errTxt=$('errTxt'), errUrl=$('errUrl'), bRetry=$('bRetry'), bOpen=$('bOpen2');
+
+  bPlay.innerHTML=svg('play'); bigBtn.innerHTML=svg('play',30);
+  bMute.innerHTML=svg('volH'); bFs.innerHTML=svg('fsOn');
+  bPip.innerHTML=svg('pip',18); bDl.innerHTML=svg('dl',18);
+  unmute.innerHTML=svg('mute',15)+'<span>Tap for sound</span>';
+
+  /* ---- CTA & end-card → smartlink ---- */
+  const ctaBox=$('cta'), ctaBtn=$('ctaBtn'), ctaSkip=$('ctaSkip'),
+        ctaBanner=$('ctaBanner'), ctaBannerLink=$('ctaBannerLink'), ctaBannerX=$('ctaBannerX'),
+        endcard=$('endcard'), ecBtn=$('ecBtn'), ecReplay=$('ecReplay');
+
+  ctaBtn.href = SMARTLINK_URL;
+  ctaBannerLink.href = SMARTLINK_URL;
+  ecBtn.href = SMARTLINK_URL;
+
+  let variant = CTA_VARIANT;
+  if (variant === 'AB') {
+    try { variant = sessionStorage.getItem('vg_cta_var'); } catch(_){}
+    if (variant !== 'A' && variant !== 'B') {
+      variant = Math.random() < .5 ? 'A' : 'B';
+      try { sessionStorage.setItem('vg_cta_var', variant); } catch(_){}
+    }
+  }
+
+  let ctaOpen=false, pausedByCta=false, endOpen=false;
+
+  function showBreak() {
+    if (ctaOpen || endOpen) return;
+    ctaOpen = true;
+    if (variant === 'A') ctaBanner.hidden = false;
+    else ctaBox.hidden = false;
+    /* video otomatis berhenti saat tombol muncul */
+    if (PAUSE_AT_CTA && !vid.paused && !vid.ended) { vid.pause(); pausedByCta = true; }
+    stage.classList.remove('idle');
+  }
+  function closeBreak(resume = true) {
+    ctaBox.hidden = true; ctaBanner.hidden = true; ctaOpen = false;
+    if (pausedByCta && resume) vid.play().catch(()=>{});
+    pausedByCta = false;
+    arm();
+  }
+  function openEndCard() {
+    if (!END_CARD || endOpen) return;
+    endOpen = true;
+    ctaBox.hidden = true; ctaBanner.hidden = true; ctaOpen = false; pausedByCta = false;
+    endcard.hidden = false;
+    stage.classList.remove('idle');
+  }
+
+  vid.addEventListener('timeupdate', () => {
+    if (vid.duration && vid.currentTime >= CTA_DELAY) showBreak();
+  });
+  vid.addEventListener('ended', openEndCard);
+  ctaBtn.addEventListener('click', () => closeBreak());      // smartlink buka tab baru + video lanjut
+  ctaBannerLink.addEventListener('click', () => closeBreak());
+  ctaSkip.addEventListener('click', () => closeBreak());
+  ctaBannerX.addEventListener('click', () => closeBreak());
+  ecReplay.addEventListener('click', () => {
+    endcard.hidden = true; endOpen = false;
+    vid.currentTime = 0; vid.play().catch(()=>{});
+  });
+
+  /* semua zona Monetag dimuat pada interaksi pertama pengunjung */
+  document.addEventListener('pointerdown', loadAds, { once: true, capture: true });
+
+  /* base CDN: dari &cdn= → memori lokal → default */
+  let cdnP = (q.get('cdn')||'').trim();
+  if (!/^https?:\/\//i.test(cdnP)) cdnP = '';
+  if (!cdnP) { try { cdnP = localStorage.getItem('vg_lastcdn') || ''; } catch(_){} }
+  if (cdnP && !/\/$/.test(cdnP)) cdnP += '/';
+
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  let src='', scrub=false, hideT=0, lastTap={t:0,x:0,tm:0}, startAt=0;
+
+  const errOn = () => !errBox.hidden;
+  function sync() {
+    const wait = !!vid.src && vid.readyState < 3 && !vid.ended && !errOn();
+    spin.classList.toggle('on', wait);
+    big.hidden = !(vid.src && !errOn() && !wait && (vid.paused || vid.ended) && !ctaOpen && !endOpen);
+    if (!big.hidden) bigBtn.innerHTML = svg(vid.ended?'replay':'play',30);
+    unmute.hidden = !(vid.muted && !vid.paused && !errOn());
+  }
+  function fail() {
+    spin.classList.remove('on'); big.hidden = true;
+    const C = {1:'Loading was aborted.',2:'Network error.',3:'Video is corrupted or failed to decode.',4:'File not found (404) or format not supported.'};
+    errTxt.textContent = (vid.error && C[vid.error.code]) || 'Source could not be reached.';
+    errUrl.textContent = src || '';
+    errBox.hidden = false;
+  }
+  function load(url, o = {}) {
+    src = url; errBox.hidden = true;
+    bDl.href = url; bOpen.href = url;
+    vid.loop = !!o.loop;
+    if (o.t > 0) startAt = o.t;
+    if (o.muted) vid.muted = true;
+    vid.src = url; vid.load(); sync(); wake();
+    if (o.autoplay !== false) vid.play().catch(() => { vid.muted = true; vid.play().catch(()=>{}); });
+    else big.hidden = false;
+  }
+
+  vid.addEventListener('loadedmetadata', () => {
+    tDur.textContent = fmt(vid.duration);
+    if (startAt && startAt < vid.duration) { vid.currentTime = startAt; startAt = 0; }
+    sync();
+  });
+  ['play','playing','pause','ended','waiting','canplay','seeking','seeked'].forEach(e => vid.addEventListener(e, sync));
+  vid.addEventListener('error', fail);
+  vid.addEventListener('progress', () => {
+    const d = vid.duration;
+    if (d && vid.buffered.length) buf.style.transform = `scaleX(${Math.min(1, vid.buffered.end(vid.buffered.length-1)/d)})`;
+  });
+  vid.addEventListener('volumechange', () => { volUI(); sync(); });
+  vid.addEventListener('ratechange', () => {
+    bSpeed.textContent = vid.playbackRate + '×';
+    menu.querySelectorAll('button').forEach(b => b.classList.toggle('on', +b.dataset.r === vid.playbackRate));
+  });
+
+  let lastC = -1;
+  (function raf() {
+    const d = vid.duration;
+    if (d > 0) {
+      const r = Math.min(1, vid.currentTime / d);
+      fill.style.transform = `scaleX(${r})`;
+      dot.style.left = r*100 + '%';
+      const c = vid.currentTime|0;
+      if (c !== lastC) { lastC = c; tCur.textContent = fmt(c); }
+    }
+    requestAnimationFrame(raf);
+  })();
+
+  function togglePlay() {
+    if (!vid.src) return;
+    if (vid.paused || vid.ended) vid.play().catch(()=>{ vid.muted=true; vid.play().catch(()=>{}); });
+    else vid.pause();
+    wake();
+  }
+  bPlay.onclick = togglePlay;
+  bigBtn.onclick = togglePlay;
+
+  const ratio = e => { const r = prog.getBoundingClientRect(); return Math.min(1, Math.max(0,(e.clientX-r.left)/r.width)); };
+  prog.addEventListener('pointerdown', e => {
+    if (!vid.duration) return;
+    scrub = true; prog.classList.add('scr'); prog.setPointerCapture(e.pointerId);
+    vid.currentTime = ratio(e)*vid.duration; e.preventDefault();
+  });
+  prog.addEventListener('pointermove', e => {
+    const r = prog.getBoundingClientRect();
+    bubble.style.left = Math.min(r.width-38, Math.max(38, e.clientX-r.left)) + 'px';
+    bubble.textContent = fmt(ratio(e)*(vid.duration||0));
+    if (scrub && vid.duration) vid.currentTime = ratio(e)*vid.duration;
+  });
+  const endS = () => { scrub=false; prog.classList.remove('scr'); wake(); };
+  prog.addEventListener('pointerup', endS);
+  prog.addEventListener('pointercancel', endS);
+
+  function wake(){ stage.classList.remove('idle'); clearTimeout(hideT); arm(); }
+  function arm(){
+    clearTimeout(hideT);
+    if (!vid.paused && !scrub && menu.hidden && !ctaOpen && !endOpen)
+      hideT = setTimeout(()=>{ if(!vid.paused && menu.hidden && !ctaOpen && !endOpen) stage.classList.add('idle'); }, 2600);
+  }
+  stage.addEventListener('pointermove', wake);
+
+  function seek(d){ if (vid.duration) vid.currentTime = Math.min(vid.duration-.05, Math.max(0, vid.currentTime+d)); }
+  function ripple(x,y,l) {
+    const el = document.createElement('div'); el.className='ripple';
+    el.style.left = Math.min(stage.clientWidth-70, Math.max(70,x))+'px';
+    el.style.top  = Math.min(stage.clientHeight-80, Math.max(80,y))+'px';
+    el.innerHTML = '<i></i><b>'+l+'</b>';
+    stage.appendChild(el); setTimeout(()=>el.remove(), 620);
+  }
+  tap.addEventListener('pointerup', e => {
+    if (e.pointerType==='mouse' && e.button!==0) return;
+    const r = stage.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top, now=Date.now();
+    if (!fine) {
+      if (now-lastTap.t<330 && Math.abs(e.clientX-lastTap.x)<90) {
+        clearTimeout(lastTap.tm); lastTap.t=0;
+        const rx = x/r.width;
+        if (vid.duration && (rx<.38 || rx>.62)) {
+          const d = rx<.38 ? -10 : 10;
+          seek(d); ripple(x,y,(d>0?'+':'\u2212')+'10s');
+        } else togglePlay();
+        wake(); return;
+      }
+      lastTap.t=now; lastTap.x=e.clientX;
+      lastTap.tm = setTimeout(()=>{ stage.classList.contains('idle') ? wake() : (vid.paused ? wake() : stage.classList.add('idle')); }, 310);
+    } else togglePlay();
+  });
+  tap.addEventListener('dblclick', ()=>{ if (fine) fsToggle(); });
+
+  function volUI() {
+    const m = vid.muted || vid.volume===0;
+    bMute.innerHTML = svg(m?'mute':(vid.volume<.5?'volL':'volH'));
+    vol.value = m?0:vid.volume;
+    const p = (m?0:vid.volume)*100;
+    vol.style.background = `linear-gradient(to right,#fff ${p}%,rgba(255,255,255,.25) ${p}%)`;
+  }
+  bMute.onclick = () => { vid.muted = !vid.muted; if (!vid.muted && vid.volume===0) vid.volume=.5; };
+  vol.oninput = () => { vid.volume = +vol.value; vid.muted = vol.value==0; };
+  unmute.onclick = () => { vid.muted = false; };
+
+  const RATES=[.5,.75,1,1.25,1.5,2];
+  menu.innerHTML = RATES.map(r=>`<button data-r="${r}">${r}×</button>`).join('');
+  menu.querySelector('[data-r="1"]').classList.add('on');
+  menu.onclick = e => { const b=e.target.closest('button'); if(b){ vid.playbackRate=+b.dataset.r; menu.hidden=true; } };
+  bSpeed.onclick = e => { e.stopPropagation(); menu.hidden=!menu.hidden; };
+  document.addEventListener('pointerdown', e => { if(!menu.hidden && !menu.contains(e.target) && e.target!==bSpeed) menu.hidden=true; });
+
+  if (document.pictureInPictureEnabled) bPip.hidden = false;
+  bPip.onclick = async () => { try { document.pictureInPictureElement ? await document.exitPictureInPicture() : await vid.requestPictureInPicture(); } catch(_){} };
+
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  function fsToggle() {
+    try {
+      if (!fsEl()) {
+        if (stage.requestFullscreen) stage.requestFullscreen();
+        else if (stage.webkitRequestFullscreen) stage.webkitRequestFullscreen();
+        else if (vid.webkitEnterFullscreen) vid.webkitEnterFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    } catch(_){}
+  }
+  bFs.onclick = fsToggle;
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev =>
+    document.addEventListener(ev, ()=> bFs.innerHTML = svg(fsEl()?'fsOff':'fsOn')));
+
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input,textarea') || e.target.isContentEditable || !vid.src) return;
+    const k = e.key.toLowerCase();
+    if (e.key===' '||k==='k'){ e.preventDefault(); togglePlay(); }
+    else if (e.key==='ArrowRight'){ e.preventDefault(); seek(5); wake(); }
+    else if (e.key==='ArrowLeft'){ e.preventDefault(); seek(-5); wake(); }
+    else if (e.key==='ArrowUp'){ e.preventDefault(); vid.volume=Math.min(1,+(vid.volume+.1).toFixed(2)); vid.muted=false; }
+    else if (e.key==='ArrowDown'){ e.preventDefault(); vid.volume=Math.max(0,+(vid.volume-.1).toFixed(2)); }
+    else if (k==='m') bMute.click();
+    else if (k==='f') fsToggle();
+    else if (k==='p' && !bPip.hidden) bPip.click();
+    else if (/^[0-9]$/.test(e.key) && vid.duration) vid.currentTime = vid.duration*(+e.key/10);
+  });
+
+  bRetry.onclick = () => { if (src) load(src, {autoplay:false}); };
+
+  load(resolveSrc(id, cdnP), {
+    autoplay: q.get('autoplay') !== '0',
+    muted:    q.get('muted') === '1',
+    loop:     q.get('loop') === '1',
+    t:        parseFloat(q.get('t')) || 0
+  });
+  volUI();
+}
+
+/* ================= MODE GENERATOR (root) ================= */
+function initGen() {
+  $('modePlayer').hidden = true;
+  $('modeTool').hidden = false;
+
+  document.title = 'Free Direct MP4 Player Online — Paste a Link, Watch Instantly · ' + SITE_NAME;
+  setMeta('description','Turn any direct MP4 link into a clean, mobile-friendly watch page. Free browser tool — no account, no re-upload.');
+  setMeta('og:title', document.title);
+  setMeta('og:description','Paste a video link, get a shareable watch page. Free, fast, works on every device.');
+  setMeta('og:type','website');
+  setCanonical(location.origin + location.pathname);
+  setLD({
+    '@context':'https://schema.org','@type':'FAQPage',
+    mainEntity:[
+      {'@type':'Question',name:'Which links are supported?',acceptedAnswer:{'@type':'Answer',text:'Any direct video file — MP4, WebM, MOV and others — hosted on a CDN or web server, including links with extra URL parameters.'}},
+      {'@type':'Question',name:'Do I need an account?',acceptedAnswer:{'@type':'Answer',text:'No. The tool runs entirely in your browser and keeps a small history on your device only.'}},
+      {'@type':'Question',name:'Can I use just a filename?',acceptedAnswer:{'@type':'Answer',text:'Yes. Type the filename alone and the player resolves it against your default or previously used CDN automatically.'}},
+      {'@type':'Question',name:'Does it work on mobile?',acceptedAnswer:{'@type':'Answer',text:'Yes — the player is built touch-first with tap-to-seek, double-tap skip, and fullscreen on every platform.'}}
+    ]
+  });
+
+  const td=$('tDate'); td.textContent = fmtDate(new Date()); td.dateTime = new Date().toISOString();
+
+  const srcIn=$('srcIn'), cdnIn=$('cdnIn'), baseIn=$('baseIn'), thumbIn=$('thumbIn'),
+        cdnChip=$('cdnChip'), cdnState=$('cdnState'), cdnEdit=$('cdnEdit'), adv=$('adv'),
+        opA=$('opA'), opM=$('opM'), opL=$('opL'),
+        pvWrap=$('pvWrap'), pv=$('pv'), pvInfo=$('pvInfo'), pvErr=$('pvErr'),
+        outWrap=$('outWrap'), outUrl=$('outUrl'), outEmb=$('outEmb'),
+        bCopy=$('bCopy'), bShare=$('bShare'), bOpen=$('bOpen'), bCopyEmb=$('bCopyEmb'),
+        histWrap=$('histWrap'), histUl=$('hist');
+
+  try { baseIn.value = localStorage.getItem('vg_base') || ''; } catch(_){}
+
+  const lastCdn = () => { try { return localStorage.getItem('vg_lastcdn') || ''; } catch(_){ return ''; } };
+  function learn(b) {
+    if (!b) return;
+    try {
+      localStorage.setItem('vg_lastcdn', b);
+      let a = JSON.parse(localStorage.getItem('vg_cdns')||'[]');
+      a = [b, ...a.filter(x=>x!==b)].slice(0,6);
+      localStorage.setItem('vg_cdns', JSON.stringify(a));
+    } catch(_){}
+  }
+  function candidateBases() {
+    const list = [];
+    if (manualBase) list.push(manualBase);
+    const last = lastCdn(); if (last) list.push(last);
+    try { JSON.parse(localStorage.getItem('vg_cdns')||'[]').forEach(c=>list.push(c)); } catch(_){}
+    list.push(DEFAULT_CDN);
+    return [...new Set(list.filter(Boolean))];
+  }
+
+  let curKind='empty', curUrl='', curName='', curProbe='',
+      manualBase='', detectedBase='', cands=[], ci=0,
+      playerUrl='', embH=360, attemptT=0, lastPvSrc='';
+
+  function classify(v) {
+    v = (v||'').trim();
+    if (!v) return {k:'empty'};
+    let u = null;
+    if (/^https?:\/\//i.test(v)) u = v;
+    else if (/^\/\//.test(v)) u = 'https:' + v;
+    if (u) { try { u = new URL(u).href; } catch(_){} return {k:'url', u, base:originOf(u)}; }
+    const n = v.replace(/^\.?\/+/, '');
+    const probe = (!VIDEO_EXT.test(n) && !n.includes('?')) ? n + '.mp4' : n;
+    return {k:'file', n, probe};
+  }
+  function setChip(host, state) { cdnChip.textContent = host || '—'; cdnState.textContent = state || ''; }
+
+  function build() {
+    if (curKind === 'empty') { outWrap.hidden = true; pvWrap.hidden = true; pvErr.hidden = true; return; }
+    const qq = new URLSearchParams();
+    if (curKind === 'url') qq.set('id', curUrl);
+    else { qq.set('id', curName); qq.set('cdn', manualBase || detectedBase || cands[0] || DEFAULT_CDN); }
+    if (!opA.checked) qq.set('autoplay','0');
+    if (opM.checked)  qq.set('muted','1');
+    if (opL.checked)  qq.set('loop','1');
+    const th = thumbIn.value.trim(); if (th) qq.set('thumb', th);
+    const base = (baseIn.value.trim() || location.origin + location.pathname).replace(/\?+$/,'');
+    playerUrl = base + '?' + qq.toString();
+    try { localStorage.setItem('vg_base', baseIn.value.trim()); } catch(_){}
+    outUrl.value = playerUrl;
+    outEmb.value = '<iframe src="' + playerUrl + '" width="640" height="' + embH +
+                   '" frameborder="0" scrolling="no" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+    outWrap.hidden = false;
+  }
+
+  function showPvErr(msg) {
+    pvWrap.hidden = true;
+    pvErr.innerHTML = msg || '⚠️ The video could not be loaded from this browser — the link may be dead or the CDN blocks external access. You can still copy the link and test it with <b>OPEN</b>.';
+    pvErr.hidden = false;
+  }
+  function attempt() {
+    clearTimeout(attemptT);
+    const b = cands[ci];
+    setChip(originOf(joinBase(b,'')), ci===0 ? 'detecting…' : `trying another source (${ci+1}/${cands.length})…`);
+    lastPvSrc = joinBase(b, curProbe);
+    pvWrap.hidden = true; pvErr.hidden = true;
+    pv.src = lastPvSrc; pv.load();
+    attemptT = setTimeout(pvFail, 9000);
+  }
+  function pvFail() {
+    clearTimeout(attemptT);
+    if (curKind === 'file' && ci < cands.length - 1) { ci++; attempt(); return; }
+    setChip(originOf(lastPvSrc) || '—', 'failed to load');
+    showPvErr();
+  }
+  pv.addEventListener('error', pvFail);
+  pv.addEventListener('loadedmetadata', () => {
+    clearTimeout(attemptT);
+    if (curKind === 'file') {
+      detectedBase = cands[ci] || originOf(pv.currentSrc) || DEFAULT_CDN;
+      learn(detectedBase);
+      setChip(detectedBase, (manualBase && detectedBase === manualBase) ? 'manual' : 'auto ✓');
+      build();
+    }
+    pvInfo.textContent = `${pv.videoWidth}×${pv.videoHeight} · ${fmt(pv.duration)} — video OK, ready to share`;
+    if (pv.videoWidth) embH = Math.round(640 * pv.videoHeight / pv.videoWidth) || 360;
+    build();
+    pvWrap.hidden = false; pvErr.hidden = true;
+    try { pv.currentTime = 0.1; } catch(_){}
+  });
+
+  function onChange() {
+    const c = classify(srcIn.value);
+    curKind = c.k;
+    if (c.k === 'empty') { detectedBase=''; setChip('—',''); build(); return; }
+    if (c.k === 'url') {
+      curUrl = c.u; detectedBase = c.base;
+      learn(c.base);
+      setChip(c.base, 'from URL ✓');
+      build();
+      clearTimeout(attemptT); pvErr.hidden = true;
+      if (lastPvSrc !== c.u) { lastPvSrc = c.u; pvWrap.hidden = true; pv.src = c.u; pv.load(); }
+      attemptT = setTimeout(() => { if (pv.readyState < 1) showPvErr(); }, 12000);
+      return;
+    }
+    curName = c.n; curProbe = c.probe; detectedBase = '';
+    cands = candidateBases(); ci = 0;
+    build();
+    attempt();
+  }
+
+  let deb;
+  const debounced = () => { clearTimeout(deb); deb = setTimeout(onChange, 300); };
+  [srcIn, thumbIn].forEach(i => i.addEventListener('input', debounced));
+  [opA, opM, opL].forEach(cb => cb.addEventListener('change', build));
+  srcIn.addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(deb); onChange(); } });
+
+  cdnEdit.onclick = () => { adv.hidden = !adv.hidden; cdnEdit.textContent = adv.hidden ? 'edit' : 'close'; };
+  cdnIn.addEventListener('input', () => {
+    let v = cdnIn.value.trim();
+    if (v && !/^https?:\/\//i.test(v)) v = 'https://' + v;
+    manualBase = v ? (v.endsWith('/') ? v : v + '/') : '';
+    clearTimeout(deb); deb = setTimeout(onChange, 250);
+  });
+
+  const loadHist = () => { try { return JSON.parse(localStorage.getItem('vg_hist')||'[]'); } catch(_){ return []; } };
+  const saveHist = a2 => { try { localStorage.setItem('vg_hist', JSON.stringify(a2)); } catch(_){} };
+  function renderHist() {
+    const a2 = loadHist();
+    histWrap.hidden = !a2.length;
+    histUl.innerHTML = '';
+    a2.forEach(it => {
+      const li = document.createElement('li');
+      const nm = document.createElement('span'); nm.className='hn'; nm.textContent = it.label; nm.title = it.link;
+      nm.onclick = () => { srcIn.value = it.raw; onChange(); };
+      const c = document.createElement('button'); c.textContent='Copy'; c.onclick = () => copyText(it.link);
+      const x = document.createElement('button'); x.textContent='✕';
+      x.onclick = () => { saveHist(loadHist().filter(h=>h.link!==it.link)); renderHist(); };
+      li.append(nm, c, x); histUl.appendChild(li);
+    });
+  }
+  function pushHist() {
+    if (!playerUrl) return;
+    let a2 = loadHist().filter(h => h.link !== playerUrl);
+    a2.unshift({ raw: srcIn.value.trim(), link: playerUrl, label: curKind==='url' ? fname(curUrl) : (curName || fname(playerUrl)) });
+    saveHist(a2.slice(0,8)); renderHist();
+  }
+
+  bCopy.onclick    = () => { copyText(playerUrl); pushHist(); };
+  bShare.onclick   = () => { pushHist(); if (navigator.share) navigator.share({title:'Video', url:playerUrl}).catch(()=>{}); else copyText(playerUrl); };
+  bOpen.onclick    = () => { pushHist(); window.open(playerUrl, '_blank'); };
+  bCopyEmb.onclick = () => { copyText(outEmb.value); pushHist(); };
+  outUrl.onclick   = () => outUrl.select();
+  outEmb.onclick   = () => outEmb.select();
+
+  renderHist();
+  setTimeout(()=>srcIn.focus(), 60);
+}
+
+/* ================= DISPATCH ================= */
+ $('brand').textContent = SITE_NAME;
+ $('brand2').textContent = SITE_NAME;
+ $('yr').textContent = new Date().getFullYear();
+
+const id = getId();
+if (id) initPlayer(id, new URLSearchParams(location.search));
+else initGen();
+
+})();
+</script>
+</body>
+</html>
