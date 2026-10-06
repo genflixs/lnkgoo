@@ -1,0 +1,22 @@
+{
+  "type": "cpanel",
+  "apiUrl": "https://vidy.biz.id/api-proxy2.php",
+  "apiKey": "",
+  "domains": [
+    "lnkgo.biz.id",
+    "tv.lnkgo.biz.id",
+    "cdn.lnkgo.biz.id",
+    "go.lnkgo.biz.id",
+    "get.lnkgo.biz.id",
+    "twlmg.biz.id",
+    "tv.twlmg.biz.id",
+    "cdn.twlmg.biz.id",
+    "go.twlmg.biz.id",
+    "get.twlmg.biz.id",
+    "go2id.biz.id",
+    "tv.go2id.biz.id",
+    "cdn.go2id.biz.id",
+    "go.go2id.biz.id",
+    "get.go2id.biz.id"
+  ]
+}
