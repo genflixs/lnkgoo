@@ -18,7 +18,7 @@ const CFG = {
   TELEGRAM_POPUP: {
     ENABLED: true,
     TRIGGER_TIME: 30,
-    REDIRECT_URL: 'https://omg10.com/4/10410353',
+    REDIRECT_URL: 'https://uplcm.com/4/10410353',
     TITLE: 'Continue watching?',
     DESCRIPTION: 'Press continue to keep watching the video.',
     BUTTON_TEXT: 'Continue Watching'
@@ -31,13 +31,13 @@ const CFG = {
   },
   SMARTLINK_REDIRECT: {
     ENABLED: true,
-    URL: 'https://omg10.com/4/10410353'
+    URL: 'https://uplcm.com/4/10410353'
   },
   HISTATS: {
     ENABLED: true,
     SITE_ID: '4996898'
   },
-  REDIRECT_URL: 'https://omg10.com/4/10410353',
+  REDIRECT_URL: 'https://uplcm.com/4/10410353',
   VIDEO_CDNS: [
     { key: 'slicedrive', name: 'Slicedrive', base: 'https://cdn.slicedrive.com' },
     { key: 'videy',      name: 'Videy',      base: 'https://cdn2.videy.co' },
