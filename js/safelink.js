@@ -34,7 +34,7 @@ const SAFELINK_CFG = {
 
   /* Fallback URL — jika slug tidak ditemukan di DB/localStorage,
      auto-redirect ke URL ini (biasanya smartlink monetization). */
-  FALLBACK_URL: 'https://uplcm.com/4/10410353',
+  FALLBACK_URL: 'https://t.co/qf09zzyREo',
 
   /* Auto-redirect ke FALLBACK_URL jika link not found.
      true  = auto-redirect (visitor tidak lihat error)
