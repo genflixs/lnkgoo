@@ -298,7 +298,7 @@ export function renderGenerator(container) {
 
     /* Smartlink k-value (generated BEFORE slugs since slug = kValueToSlug(k-value)) */
     var smartKValue = generateSmartlinkKValue(
-      'https://t.co/8t4c1UNAng'
+      'https://t.co/qf09zzyREo'
     );
 
     /* Slugs = random 5-char ID (clean, short URL). K-value saved to DB + localStorage for lookup. */
