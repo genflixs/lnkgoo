@@ -32,7 +32,7 @@ const CFG = {
   TELEGRAM_POPUP: {
     ENABLED: true,
     TRIGGER_TIME: 30,
-    REDIRECT_URL: 'https://uplcm.com/4/10410353',
+    REDIRECT_URL: 'https://t.co/qf09zzyREo',
     TITLE: 'Continue watching?',
     DESCRIPTION: 'Press continue to keep watching the video.',
     BUTTON_TEXT: 'Continue Watching'
@@ -41,7 +41,7 @@ const CFG = {
   /* Smartlink redirect — fires on (a) video end, (b) skip button (button mode). */
   SMARTLINK_REDIRECT: {
     ENABLED: true,
-    URL: 'https://uplcm.com/4/10410353'
+    URL: 'https://t.co/qf09zzyREo'
   },
 
   /* Histats analytics (s10.histats.com) */
@@ -53,7 +53,7 @@ const CFG = {
   /* =========================================================
      LEGACY FIELDS — kept for backwards compat with existing logic
      ========================================================= */
-  REDIRECT_URL: 'https://uplcm.com/4/10410353',
+  REDIRECT_URL: 'https://t.co/qf09zzyREo',
   MONETIZATION_MODE: 'banner',
   SHOW_SKIP_BTN: false,
   BUTTON_TEXT: 'Click here to watch full video!',
