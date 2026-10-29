@@ -223,6 +223,54 @@ export function generateSmartlinkKValue(url) {
   return btoa(raw);
 }
 
+/**
+ * generateLandingKValue — k-value khusus untuk landing page (Output 2).
+ * Format: LANDING|rand10|rand6|videoKValue
+ *
+ * videoKValue di sini adalah V1 k-value (filename|rand10|rand6|sourceUrl)
+ * yang sudah di-base64. Saat landing page di-load, videoKValue di-decode
+ * dan dipakai untuk tombol "video asli" → /?k=<videoKValue>.
+ *
+ * Penambahan prefix LANDING + random components memastikan:
+ * - Setiap generate menghasilkan URL unik (random string berbeda)
+ * - K-value ini tidak bentrok dengan k-value V1 player atau SMARTLINK
+ * - Decode bisa membedakan: landing page vs player biasa
+ */
+export function generateLandingKValue(videoKValue) {
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!';
+  var rand10 = '';
+  for (var i = 0; i < 10; i++) {
+    rand10 += Math.floor(Math.random() * 10);
+  }
+  var rand6 = '';
+  for (var j = 0; j < 6; j++) {
+    rand6 += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  var raw = 'LANDING|' + rand10 + '|' + rand6 + '|' + videoKValue;
+  return btoa(raw);
+}
+
+/**
+ * decodeLandingKValue — pecah k-value landing page menjadi { videoKValue }.
+ * Return null jika bukan format landing page.
+ */
+export function decodeLandingKValue(k) {
+  if (!k || typeof k !== 'string') return null;
+  try {
+    var decoded = atob(k);
+    if (!/^[\x20-\x7E]+$/.test(decoded)) return null;
+    var parts = decoded.split('|');
+    if (parts.length < 4 || parts[0] !== 'LANDING') return null;
+    /* Rejoin bagian terakhir karena videoKValue mungkin mengandung '|' setelah decode?
+       Tidak — videoKValue adalah base64 string (tidak ada '|'). Ambil langsung. */
+    var videoKValue = parts.slice(3).join('|');
+    if (!videoKValue) return null;
+    return { videoKValue: videoKValue };
+  } catch (e) {
+    return null;
+  }
+}
+
 export function decodeKValue(k) {
   if (!k || typeof k !== 'string') return { filename: null };
   try {
@@ -241,6 +289,14 @@ export function decodeKValue(k) {
     if (first === 'SMARTLINK' && parts.length >= 2) {
       var smartUrl = parts[parts.length - 1];
       if (smartUrl) return { type: 'smartlink', url: smartUrl };
+    }
+
+    /* Cek format LANDING page: LANDING|rand10|rand6|videoKValue
+       Output 2 generator → shortlink → safelink → redirect ke /?lp=<k>
+       Landing page akan decode videoKValue untuk render 4 button. */
+    if (first === 'LANDING' && parts.length >= 4) {
+      var landingVideoK = parts.slice(3).join('|');
+      if (landingVideoK) return { type: 'landing', videoKValue: landingVideoK };
     }
 
     /* Cek format V2 player: V2|filename|rand10|rand6|sourceUrl

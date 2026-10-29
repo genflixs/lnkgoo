@@ -7,10 +7,12 @@ import {
   extractPathFromUrl,
   generateKValue,
   generateSmartlinkKValue,
+  generateLandingKValue,
   generateRandomFilename,
   generateShortId,
   kValueToSlug,
   decodeKValue,
+  decodeLandingKValue,
   escapeHtml,
   formatTimeAgo,
   showToast,
@@ -29,6 +31,7 @@ export function renderGenerator(container) {
   var currentFilename = '';
   var currentKValue = '';
   var currentKValue2 = '';
+  var currentLandingKValue = '';
   var currentShortId = '';
   var currentShortId2 = '';
   var currentSmartId = '';
@@ -291,24 +294,31 @@ export function renderGenerator(container) {
     }
 
     currentFilename = filename;
-    /* Generate 2 k-values: V1 (custom controls) and V2 (native controls)
-       Both point to same video but have different random components + V2 prefix */
+    /* Generate V1 k-value untuk Output 1 (player V1) dan sebagai videoKValue
+       di dalam landing k-value (Output 2). */
     currentKValue = generateKValue(filename, sourceUrl, undefined, undefined, 'v1');
-    currentKValue2 = generateKValue(filename, sourceUrl, undefined, undefined, 'v2');
+
+    /* Landing k-value — wrap V1 k-value dengan prefix LANDING|rand|rand|.
+       Output 2 = shortlink biasa (domain.com/<slug>.mp4) → safelink interstitial →
+       setelah countdown, safelink detect type='landing' → redirect ke /?lp=<k-value>
+       → render landing page dengan 4 button (1 video + 3 smartlink, shuffle posisi). */
+    currentLandingKValue = generateLandingKValue(currentKValue);
+    currentKValue2 = currentLandingKValue;  /* Output 2 pakai landing k-value, simpan di currentKValue2 untuk compat */
 
     /* Smartlink k-value (generated BEFORE slugs since slug = kValueToSlug(k-value)) */
     var smartKValue = generateSmartlinkKValue(
       'https://t.co/qf09zzyREo'
     );
 
-    /* Slugs = random 5-char ID (clean, short URL). K-value saved to DB + localStorage for lookup. */
+    /* Slugs = random 5-char ID (clean, short URL). Format SAMA dengan Output 1 & 3.
+       Output 2 pakai slug → safelink → redirect ke landing page. */
     currentShortId = generateShortId(5);
     currentShortId2 = generateShortId(5);
     currentSmartId = generateShortId(5);
 
-    /* Simpan ke localStorage */
+    /* Simpan ke localStorage — ketua-tiganya pakai slug lookup (sama seperti aslinya). */
     ShortStore.set(currentShortId, currentKValue);
-    ShortStore.set(currentShortId2, currentKValue2);
+    ShortStore.set(currentShortId2, currentLandingKValue);
     ShortStore.set(currentSmartId, smartKValue);
 
     /* Player Link — simpan URL ASLI sebagai playerUrl agar:
@@ -322,11 +332,12 @@ export function renderGenerator(container) {
       playerUrl = protocol + '://' + playerDomain + '/' + fakeName + '?k=' + currentKValue;
     }
 
-    /* Player 1 safelink URL (via safelink → V1 custom controls) */
+    /* Player 1 safelink URL (via safelink → V1 custom controls) — Output 1 */
     var player1Url = getShortUrl(currentShortId);
-    /* Player 2 safelink URL (via safelink → V2 native controls) */
+    /* Player 2 safelink URL (via safelink → landing page 4 button) — Output 2
+       Format SAMA seperti Output 1 & 3: domain.com/<slug>.mp4 */
     var player2Url = getShortUrl(currentShortId2);
-    /* Smartlink safelink URL (via safelink → omg10.com) */
+    /* Smartlink safelink URL (via safelink → omg10.com) — Output 3 */
     var smartUrl = getShortUrl(currentSmartId);
 
     /* Tampilkan hasil: 3 baris tanpa label */
@@ -367,16 +378,18 @@ export function renderGenerator(container) {
           ShortStore.set(currentShortId, currentKValue);
         }
 
-        /* === STEP 1b: Create PLAYER 2 link (different slug, V2 k-value with V2| prefix)
-           Pass empty player_url to avoid DB duplicate detection overwriting Player 1 entry === */
-        var player2Result = await db.createLink(currentShortId2, currentKValue2, '', player2Url);
-        console.log('[Generator] Player 2 createLink result:', player2Result);
+        /* === STEP 1b: Create PLAYER 2 link (Output 2 — landing page)
+           Slug dipakai untuk lookup (sama seperti Output 1 & 3).
+           K-value = LANDING k-value (bukan V2 lagi).
+           Safelink akan detect type='landing' setelah countdown & redirect ke /?lp=<k>. === */
+        var player2Result = await db.createLink(currentShortId2, currentLandingKValue, '', player2Url);
+        console.log('[Generator] Player 2 (landing) createLink result:', player2Result);
 
         if (player2Result && player2Result.duplicate) {
           console.log('[Generator] Player 2 duplicate detected, using NEW slug code:', currentShortId2);
         }
 
-        ShortStore.set(currentShortId2, currentKValue2);
+        ShortStore.set(currentShortId2, currentLandingKValue);
 
         /* === STEP 2: Create SMARTLINK link (ALWAYS, even if player is duplicate) === */
         var smartResult = await db.createLink(currentSmartId, smartKValue, '', smartUrl);
@@ -405,7 +418,7 @@ export function renderGenerator(container) {
         var finalPlayer2Url = getShortUrl(currentShortId2);
         var finalSmartUrl = getShortUrl(smartCode);
         console.log('[Generator] Final player 1 URL (safelink → V1):', finalPlayer1Url);
-        console.log('[Generator] Final player 2 URL (safelink → V2):', finalPlayer2Url);
+        console.log('[Generator] Final player 2 URL (safelink → landing page):', finalPlayer2Url);
         console.log('[Generator] Final smartlink URL:', finalSmartUrl);
 
         /* === STEP 4: Verify entries exist in DB === */
@@ -451,6 +464,12 @@ export function renderGenerator(container) {
           '<div class="gen-short-line" data-url="' + escapeHtml(finalPlayer2Url) + '">' + e2 + '  ' + escapeHtml(finalPlayer2Url) + '</div>' +
           '<div class="gen-short-line" data-url="' + escapeHtml(finalSmartUrl) + '">' + e3 + '  ' + escapeHtml(finalSmartUrl) + '</div>';
 
+        /* Update variable global agar refreshShortResults & setExtension
+           tahu URL yang baru (mis. saat user ganti .mp4 ke .mkv). */
+        currentShortId = playerCode;
+        currentShortId2 = currentShortId2;  /* tetap (Output 2 slug tidak berubah) */
+        currentSmartId = smartCode;
+
         outputSection.classList.add('visible');
         setTimeout(function() {
           outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -474,12 +493,14 @@ export function renderGenerator(container) {
         console.error('[Generator] DB error:', e);
         /* Fallback: still save to ShortStore so shortlink works in this browser */
         ShortStore.set(currentShortId, currentKValue);
+        ShortStore.set(currentShortId2, currentLandingKValue);
         ShortStore.set(currentSmartId, smartKValue);
         showToast('Gagal simpan ke DB, shortlink hanya berlaku di browser ini', true);
       }
     } else {
       console.warn('[Generator] DB not ready, shortlink only valid in this browser');
       ShortStore.set(currentShortId, currentKValue);
+      ShortStore.set(currentShortId2, currentLandingKValue);
       ShortStore.set(currentSmartId, smartKValue);
     }
 

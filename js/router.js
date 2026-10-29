@@ -28,11 +28,22 @@ export function getRoute() {
   var isSafelink = false;
   var safelinkSlug = null;
   var playerMode = null;  /* 'v1' (custom controls) or 'v2' (native controls) */
+  var isLanding = false;
+  var landingKValue = null;
 
   /* Method 0: ?vid=slug — halaman safelink interstitial */
   if (params.has('vid')) {
     isSafelink = true;
     safelinkSlug = params.get('vid');
+  }
+
+  /* Method 0b: ?lp=<k-value> — halaman landing page (Videy.co style)
+     Setelah safelink countdown selesai, doContinue() redirect ke /?lp=<k>.
+     Query param di root path → tidak perlu .htaccess rewrite, langsung load
+     index.html → router detect ?lp= → render landing page. */
+  if (!isSafelink && params.has('lp')) {
+    isLanding = true;
+    landingKValue = params.get('lp') || '';
   }
 
   /* Method 1a: ?k= query param (player V1 — custom controls) */
@@ -48,7 +59,7 @@ export function getRoute() {
   }
 
   /* Method 2: path-based (shortlink) */
-  if (!isSafelink && !kValue && path && path !== '/') {
+  if (!isSafelink && !isLanding && !kValue && path && path !== '/') {
     var slug = extractSlugFromPath(path);
     if (slug && slug.length >= 5) {
       shortSlug = slug;
@@ -87,8 +98,10 @@ export function getRoute() {
     isSafelink: isSafelink,
     safelinkSlug: safelinkSlug,
     playerMode: playerMode,
-    isGenerator: !isSafelink && !kValue && !isShortRedirect,
-    isPlayer: !!kValue && !isShortRedirect && !isSafelink,
-    isShortRedirect: isShortRedirect
+    isGenerator: !isSafelink && !kValue && !isShortRedirect && !isLanding,
+    isPlayer: !!kValue && !isShortRedirect && !isSafelink && !isLanding,
+    isShortRedirect: isShortRedirect,
+    isLanding: isLanding,
+    landingKValue: landingKValue
   };
 }

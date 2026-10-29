@@ -2206,3 +2206,198 @@ body.is-safelink {
     bottom: 50px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LANDING PAGE — Videy.co style (Output 2 generator)
+   Halaman ini muncul saat user visit domain.com/v?video=<encoded-k>
+   Tampil 4 button: 1 → video asli, 3 → smartlink (posisi di-shuffle).
+   ═══════════════════════════════════════════════════════════════ */
+body.is-landing {
+  background: #0f172a;
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: #ffffff;
+  font-family: var(--font);
+}
+
+.landing-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(56, 189, 248, 0.10), transparent 50%),
+    radial-gradient(circle at 80% 90%, rgba(34, 211, 238, 0.08), transparent 50%),
+    #0f172a;
+}
+
+.landing-inner {
+  width: 100%;
+  max-width: 480px;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 32px 24px 24px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ── Header / Logo ── */
+.landing-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.landing-logo {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #3b82f6;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* ── Main content ── */
+.landing-main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.landing-desc {
+  font-size: 0.92rem;
+  color: #d1d5db;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ── Button list ── */
+.landing-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.landing-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font);
+  text-decoration: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: transform 0.12s var(--ease), filter 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.landing-btn:active {
+  transform: scale(0.98);
+}
+
+/* Variant: primary (blue highlight — untuk Play Video & Video Link 4) */
+.landing-btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+.landing-btn-primary:hover {
+  background: #1d4ed8;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+/* Variant: alt (gray — untuk Video Link 2 & Video Link 3) */
+.landing-btn-alt {
+  background: #374151;
+  color: #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+.landing-btn-alt:hover {
+  background: #4b5563;
+  color: #ffffff;
+}
+
+/* Loading state */
+.landing-btn-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.landing-btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* ── Footer ── */
+.landing-footer {
+  font-size: 0.72rem;
+  color: #6b7280;
+  padding-top: 4px;
+}
+
+/* ── Loading page (sebelum redirect ke smartlink saat k-value invalid) ── */
+.landing-loading {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: #d1d5db;
+  font-size: 0.9rem;
+}
+.landing-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .landing-page {
+    padding: 16px 12px;
+  }
+  .landing-inner {
+    padding: 24px 18px 18px;
+    border-radius: 12px;
+  }
+  .landing-logo {
+    font-size: 1.8rem;
+  }
+  .landing-desc {
+    font-size: 0.86rem;
+  }
+  .landing-btn {
+    padding: 13px 14px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .landing-logo {
+    font-size: 1.6rem;
+  }
+  .landing-btn {
+    padding: 12px 12px;
+    font-size: 0.85rem;
+  }
+}
+

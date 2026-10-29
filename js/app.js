@@ -4,6 +4,7 @@ import { renderPlayer } from './player.js?v=57';
 import { renderPlayerV2 } from './player-v2.js?v=57';
 import { renderFeed } from './feed.js?v=57';
 import { renderSafelink } from './safelink.js?v=57';
+import { renderLandingPage } from './landing-page.js?v=57';
 import { generateRandomFilename } from './utils.js?v=57';
 import { initDb } from './db/index.js?v=57';
 
@@ -14,6 +15,9 @@ import { initDb } from './db/index.js?v=57';
    /?k=...                    → Player V1 (custom controls — dari safelink Continue)
    /?v=...                    → Player V2 (native HTML5 controls — DIRECT link)
    /?vid=<slug>               → Safelink interstitial (artikel + countdown)
+   /?lp=<encoded-k>           → Landing page (Videy.co style — Output 2 generator)
+                                Setelah safelink countdown, redirect ke sini.
+                                4 button: 1 video + 3 smartlink, posisi di-shuffle
    /{slug}                    → Shortlink → RENDER SAFELINK LANGSUNG
                                 (tidak ada redirect, URL tetap sama)
    /?trending=1               → Trending feed
@@ -38,6 +42,17 @@ import { initDb } from './db/index.js?v=57';
   var storedRedirect = sessionStorage.getItem('spa_redirect');
   var originalPathAndQuery = storedRedirect || '';
   var route = getRoute();
+
+  /* ── LANDING PAGE (/?lp=<encoded-k>) ──
+     Render halaman landing Videy.co style dengan 4 button:
+     1 button → player V1 (video asli), 3 button → smartlink.
+     Posisi link di-shuffle setiap page load, nama button tetap sama.
+     URL tetap di root dengan ?lp= param (tidak perlu .htaccess rewrite). */
+  if (route.isLanding) {
+    renderLandingPage(app, route.landingKValue);
+    dbPromise.catch(function() {});
+    return;
+  }
 
   /* ── SAFELINK INTERSTITIAL ──
      Dua trigger:

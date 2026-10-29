@@ -37,9 +37,12 @@ const SAFELINK_CFG = {
   FALLBACK_URL: 'https://t.co/qf09zzyREo',
 
   /* Auto-redirect ke FALLBACK_URL jika link not found.
-     true  = auto-redirect (visitor tidak lihat error)
-     false = tampilkan error message (DEFAULT — kembali ke behavior sebelumnya) */
-  AUTO_FALLBACK_ON_NOT_FOUND: false
+     true  = auto-redirect ke smartlink (visitor tidak lihat error)
+     false = tampilkan error message.
+     ── Set ke true sesuai requirement: "apabila ada url not found wajib
+        mengarah ke smartlink" — semua slug yang tidak ditemukan di
+        DB/localStorage auto-redirect ke smartlink (t.co/qf09zzyREo). ── */
+  AUTO_FALLBACK_ON_NOT_FOUND: true
 };
 
 
@@ -332,6 +335,17 @@ function doContinue(slug) {
   if (decoded.type === 'smartlink' && decoded.url) {
     console.log('[Safelink] Redirect to smartlink:', decoded.url);
     window.location.href = decoded.url;
+    return;
+  }
+
+  /* Output 2: k-value LANDING type → redirect ke /?lp=<k-value> (landing page)
+     Landing page akan render 4 button (1 video + 3 smartlink, shuffle posisi).
+     Pakai query param ?lp= di root path supaya tidak perlu .htaccess rewrite
+     (work di cPanel/Apache/GitHub Pages). */
+  if (decoded.type === 'landing' && decoded.videoKValue) {
+    var landingTargetUrl = '/?lp=' + encodeURIComponent(_prefetchedKValue);
+    console.log('[Safelink] Navigate to landing page:', landingTargetUrl);
+    window.location.href = landingTargetUrl;
     return;
   }
 
