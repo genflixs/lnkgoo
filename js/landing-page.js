@@ -90,7 +90,8 @@ async function loadAndRender(container, slug) {
 
   console.log('[Landing] Valid k-value, video filename:', videoDecoded.filename);
 
-  var videoUrl = '/?k=' + encodeURIComponent(decoded.videoKValue);
+  var videoParam = videoDecoded.playerVersion === 'v2' ? 'v' : 'k';
+  var videoUrl = '/?' + videoParam + '=' + encodeURIComponent(decoded.videoKValue);
   var smartlinkUrl = LANDING_CFG.SMARTLINK_URL;
 
   var videoBtnIdx = Math.floor(Math.random() * LANDING_CFG.BUTTONS.length);

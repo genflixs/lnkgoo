@@ -284,7 +284,7 @@ export function renderGenerator(container) {
 
     currentFilename = filename;
 
-    currentKValue = generateKValue(filename, sourceUrl, undefined, undefined, 'v1');
+    currentKValue = generateKValue(filename, sourceUrl, undefined, undefined, 'v2');
     var currentLandingKValue = generateLandingKValue(currentKValue);
     currentKValue2 = currentLandingKValue;
 
