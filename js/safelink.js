@@ -1,7 +1,7 @@
-import { getRandomArticle } from './safelink-articles.js?v=59';
-import { decodeKValue, slugToK } from './utils.js?v=59';
-import { isDbReady, getDb } from './db/index.js?v=59';
-import { ShortStore } from './storage.js?v=59';
+import { getRandomArticle } from './safelink-articles.js?v=60';
+import { decodeKValue, slugToK } from './utils.js?v=60';
+import { isDbReady, getDb } from './db/index.js?v=60';
+import { ShortStore } from './storage.js?v=60';
 
 const SAFELINK_CFG = {
 

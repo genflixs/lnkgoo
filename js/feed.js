@@ -1,5 +1,5 @@
-import { isDbReady, getDb } from './db/index.js?v=59';
-import { decodeKValue, decodeLandingKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=59';
+import { isDbReady, getDb } from './db/index.js?v=60';
+import { decodeKValue, decodeLandingKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=60';
 
 var feedLinks = [];
 

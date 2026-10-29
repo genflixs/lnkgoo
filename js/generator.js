@@ -17,9 +17,9 @@ import {
   formatTimeAgo,
   showToast,
   copyText
-} from './utils.js?v=59';
-import { isDbReady, getDb, getDomains } from './db/index.js?v=59';
-import History, { ShortStore } from './storage.js?v=59';
+} from './utils.js?v=60';
+import { isDbReady, getDb, getDomains } from './db/index.js?v=60';
+import History, { ShortStore } from './storage.js?v=60';
 
 export function renderGenerator(container) {
   var domain = getDomain();
@@ -49,9 +49,12 @@ export function renderGenerator(container) {
 
   container.innerHTML =
     '<div class="gen-header">' +
-      '<div class="gen-badge">GENERATOR TOOL</div>' +
+      '<div class="gen-header-row">' +
+        '<div class="gen-badge">GENERATOR TOOL</div>' +
+        '<div class="gen-version-badge">v2.0 • Landing Ready</div>' +
+      '</div>' +
       '<h1 class="gen-title">Video <span class="highlight">Player</span> Generator</h1>' +
-      '<p class="gen-subtitle">Buat shortlink video player dengan CDN fallback otomatis. Salin URL video, generate, dan bagikan.</p>' +
+      '<p class="gen-subtitle">3 Output: <strong style="color:#38bdf8">OUT 1 → Player V2</strong> • <strong style="color:#22d3ee">OUT 2 → Landing Page 4 Button</strong> • <strong style="color:#fe2c55">OUT 3 → Smartlink</strong></p>' +
       '<div class="gen-domain-bar">' +
         '<i class="fa-solid fa-circle-check"></i>' +
         '<span>Current domain:</span>' +
@@ -165,9 +168,9 @@ export function renderGenerator(container) {
     var e2 = pickEmoji();
     var e3 = pickEmoji();
     shortResults.innerHTML =
-      '<div class="gen-short-line" data-url="' + escapeHtml(player1Url) + '">' + e1 + '  ' + escapeHtml(player1Url) + '</div>' +
-      '<div class="gen-short-line" data-url="' + escapeHtml(player2Url) + '">' + e2 + '  ' + escapeHtml(player2Url) + '</div>' +
-      '<div class="gen-short-line" data-url="' + escapeHtml(smartUrl) + '">' + e3 + '  ' + escapeHtml(smartUrl) + '</div>';
+      '<div class="gen-short-line" data-url="' + escapeHtml(player1Url) + '"><span class="out-label out-1">OUT 1 → V2</span> ' + e1 + '  ' + escapeHtml(player1Url) + '</div>' +
+      '<div class="gen-short-line" data-url="' + escapeHtml(player2Url) + '"><span class="out-label out-2">OUT 2 → LP</span> ' + e2 + '  ' + escapeHtml(player2Url) + '</div>' +
+      '<div class="gen-short-line" data-url="' + escapeHtml(smartUrl) + '"><span class="out-label out-3">OUT 3 → SL</span> ' + e3 + '  ' + escapeHtml(smartUrl) + '</div>';
   }
 
   function setExtension(ext) {
@@ -318,9 +321,9 @@ export function renderGenerator(container) {
     var e2 = pickEmoji();
     var e3 = pickEmoji();
     shortResults.innerHTML =
-      '<div class="gen-short-line" data-url="' + escapeHtml(player1Url) + '">' + e1 + '  ' + escapeHtml(player1Url) + '</div>' +
-      '<div class="gen-short-line" data-url="' + escapeHtml(player2Url) + '">' + e2 + '  ' + escapeHtml(player2Url) + '</div>' +
-      '<div class="gen-short-line" data-url="' + escapeHtml(smartUrl) + '">' + e3 + '  ' + escapeHtml(smartUrl) + '</div>';
+      '<div class="gen-short-line" data-url="' + escapeHtml(player1Url) + '"><span class="out-label out-1">OUT 1 → V2</span> ' + e1 + '  ' + escapeHtml(player1Url) + '</div>' +
+      '<div class="gen-short-line" data-url="' + escapeHtml(player2Url) + '"><span class="out-label out-2">OUT 2 → LP</span> ' + e2 + '  ' + escapeHtml(player2Url) + '</div>' +
+      '<div class="gen-short-line" data-url="' + escapeHtml(smartUrl) + '"><span class="out-label out-3">OUT 3 → SL</span> ' + e3 + '  ' + escapeHtml(smartUrl) + '</div>';
 
     if (isDbReady()) {
       try {
@@ -401,9 +404,9 @@ export function renderGenerator(container) {
         var e2 = pickEmoji();
         var e3 = pickEmoji();
         shortResults.innerHTML =
-          '<div class="gen-short-line" data-url="' + escapeHtml(finalPlayer1Url) + '">' + e1 + '  ' + escapeHtml(finalPlayer1Url) + '</div>' +
-          '<div class="gen-short-line" data-url="' + escapeHtml(finalPlayer2Url) + '">' + e2 + '  ' + escapeHtml(finalPlayer2Url) + '</div>' +
-          '<div class="gen-short-line" data-url="' + escapeHtml(finalSmartUrl) + '">' + e3 + '  ' + escapeHtml(finalSmartUrl) + '</div>';
+          '<div class="gen-short-line" data-url="' + escapeHtml(finalPlayer1Url) + '"><span class="out-label out-1">OUT 1 → V2</span> ' + e1 + '  ' + escapeHtml(finalPlayer1Url) + '</div>' +
+          '<div class="gen-short-line" data-url="' + escapeHtml(finalPlayer2Url) + '"><span class="out-label out-2">OUT 2 → LP</span> ' + e2 + '  ' + escapeHtml(finalPlayer2Url) + '</div>' +
+          '<div class="gen-short-line" data-url="' + escapeHtml(finalSmartUrl) + '"><span class="out-label out-3">OUT 3 → SL</span> ' + e3 + '  ' + escapeHtml(finalSmartUrl) + '</div>';
 
         outputSection.classList.add('visible');
         setTimeout(function() {

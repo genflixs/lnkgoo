@@ -1,6 +1,6 @@
-import { decodeKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=59';
-import { loadVideo } from './cdn-loader.js?v=59';
-import { isDbReady, getDb } from './db/index.js?v=59';
+import { decodeKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=60';
+import { loadVideo } from './cdn-loader.js?v=60';
+import { isDbReady, getDb } from './db/index.js?v=60';
 
 const CFG = {
 

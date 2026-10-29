@@ -1,5 +1,5 @@
-import { JsonBinAdapter } from './jsonbin-adapter.js?v=59';
-import { RestApiAdapter } from './rest-adapter.js?v=59';
+import { JsonBinAdapter } from './jsonbin-adapter.js?v=60';
+import { RestApiAdapter } from './rest-adapter.js?v=60';
 
 var _adapter = null;
 var _config = null;

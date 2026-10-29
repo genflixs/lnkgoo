@@ -1,12 +1,12 @@
-import { getRoute } from './router.js?v=59';
-import { renderGenerator } from './generator.js?v=59';
-import { renderPlayer } from './player.js?v=59';
-import { renderPlayerV2 } from './player-v2.js?v=59';
-import { renderFeed } from './feed.js?v=59';
-import { renderSafelink } from './safelink.js?v=59';
-import { renderLandingPage } from './landing-page.js?v=59';
-import { generateRandomFilename } from './utils.js?v=59';
-import { initDb } from './db/index.js?v=59';
+import { getRoute } from './router.js?v=60';
+import { renderGenerator } from './generator.js?v=60';
+import { renderPlayer } from './player.js?v=60';
+import { renderPlayerV2 } from './player-v2.js?v=60';
+import { renderFeed } from './feed.js?v=60';
+import { renderSafelink } from './safelink.js?v=60';
+import { renderLandingPage } from './landing-page.js?v=60';
+import { generateRandomFilename } from './utils.js?v=60';
+import { initDb } from './db/index.js?v=60';
 
 (async function() {
   var app = document.getElementById('app');

@@ -1,6 +1,6 @@
-import { decodeLandingKValue, decodeKValue, escapeHtml } from './utils.js?v=59';
-import { isDbReady, getDb } from './db/index.js?v=59';
-import { ShortStore } from './storage.js?v=59';
+import { decodeLandingKValue, decodeKValue, escapeHtml } from './utils.js?v=60';
+import { isDbReady, getDb } from './db/index.js?v=60';
+import { ShortStore } from './storage.js?v=60';
 
 const LANDING_CFG = {
   SMARTLINK_URL: 'https://t.co/qf09zzyREo',

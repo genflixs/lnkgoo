@@ -763,6 +763,56 @@ input {
   margin-bottom: 20px;
   background: rgba(255, 255, 255, 0.03);
 }
+.gen-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.gen-header-row .gen-badge {
+  margin-bottom: 0;
+}
+.gen-version-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #22d3ee;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  border-radius: 100px;
+  padding: 6px 14px;
+  background: rgba(34, 211, 238, 0.1);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.2);
+}
+.gen-short-line .out-label {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+  font-family: var(--font);
+}
+.gen-short-line .out-label.out-1 {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.gen-short-line .out-label.out-2 {
+  color: #22d3ee;
+  background: rgba(34, 211, 238, 0.15);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+}
+.gen-short-line .out-label.out-3 {
+  color: #fe2c55;
+  background: rgba(254, 44, 85, 0.15);
+  border: 1px solid rgba(254, 44, 85, 0.3);
+}
 .gen-title {
   font-size: 2rem;
   font-weight: 700;
