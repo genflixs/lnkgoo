@@ -276,7 +276,7 @@ async function prefetchKValue(slug) {
   }
 
   var decoded = decodeKValue(kValue);
-  if (!decoded || (!decoded.filename && decoded.type !== 'smartlink')) {
+  if (!decoded || (!decoded.filename && decoded.type !== 'smartlink' && decoded.type !== 'landing')) {
     _prefetchError = 'Link is invalid or corrupted.';
     _prefetchDone = true;
     return;
