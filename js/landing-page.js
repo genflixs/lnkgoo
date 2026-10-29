@@ -22,7 +22,7 @@
  * Jika k-value invalid / missing → auto-redirect ke smartlink.
  */
 
-import { decodeLandingKValue, decodeKValue, escapeHtml } from './utils.js?v=57';
+import { decodeLandingKValue, decodeKValue, escapeHtml } from './utils.js?v=58';
 
 /* =========================================================
    CONFIG — EDIT HERE

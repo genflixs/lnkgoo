@@ -10,10 +10,10 @@
  *   - Shuffle button to change article
  */
 
-import { getRandomArticle } from './safelink-articles.js?v=57';
-import { decodeKValue, slugToK } from './utils.js?v=57';
-import { isDbReady, getDb } from './db/index.js?v=57';
-import { ShortStore } from './storage.js?v=57';
+import { getRandomArticle } from './safelink-articles.js?v=58';
+import { decodeKValue, slugToK } from './utils.js?v=58';
+import { isDbReady, getDb } from './db/index.js?v=58';
+import { ShortStore } from './storage.js?v=58';
 
 /* =========================================================
    CONFIG — EDIT HERE
