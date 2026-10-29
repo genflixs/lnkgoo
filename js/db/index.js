@@ -1,10 +1,5 @@
-/* ────────────────────────────────────────────────
-   Database Module — Config, Factory, Singleton
-   Mendukung: cPanel (MySQL via PHP), JSONBin.io
-   ──────────────────────────────────────────────── */
-
-import { JsonBinAdapter } from './jsonbin-adapter.js?v=58';
-import { RestApiAdapter } from './rest-adapter.js?v=58';
+import { JsonBinAdapter } from './jsonbin-adapter.js?v=59';
+import { RestApiAdapter } from './rest-adapter.js?v=59';
 
 var _adapter = null;
 var _config = null;
@@ -13,23 +8,19 @@ var _ready = false;
 var CONFIG_FILE = '/db-config.json';
 var STORAGE_KEY = 'vgen_db_config';
 
-/* ---- Config Persistence ---- */
-
 function loadLocalConfig() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch (e) { /* ignore */ }
+  } catch (e) {   }
   return null;
 }
 
 function saveLocalConfig(config) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  } catch (e) { /* ignore */ }
+  } catch (e) {   }
 }
-
-/* ---- Adapter Factory ---- */
 
 function createAdapter(config) {
   switch (config.type) {
@@ -39,22 +30,15 @@ function createAdapter(config) {
     case 'jsonbin':
       return new JsonBinAdapter(config);
     default:
-      /* Auto-detect: kalau ada apiUrl, gunakan REST */
+
       if (config.apiUrl) return new RestApiAdapter(config);
       return new JsonBinAdapter(config);
   }
 }
 
-/* ---- Public API ---- */
-
-/**
- * Init database — panggil sekali saat app startup.
- * Priority: Worker inline config > db-config.json (fetch) > localStorage (fallback)
- */
 export async function initDb() {
   if (_ready) return;
 
-  /* 0. Cek inline config dari Worker (window.__VF_DB_CONFIG__) — instant, no fetch */
   try {
     if (typeof window !== 'undefined' && window.__VF_DB_CONFIG__ && window.__VF_DB_CONFIG__.type) {
       _config = window.__VF_DB_CONFIG__;
@@ -64,9 +48,8 @@ export async function initDb() {
       console.log('[DB] Config loaded from Worker injection -> ' + _config.type + ' (' + (_config.domains ? _config.domains.length : 0) + ' domains)');
       return;
     }
-  } catch (e) { /* silent */ }
+  } catch (e) {   }
 
-  /* 1. Coba fetch db-config.json dari server */
   try {
     var res = await fetch(CONFIG_FILE + '?v=11');
     if (res.ok) {
@@ -80,9 +63,8 @@ export async function initDb() {
         return;
       }
     }
-  } catch (e) { /* silent */ }
+  } catch (e) {   }
 
-  /* 2. Fallback ke localStorage */
   var localConfig = loadLocalConfig();
   if (localConfig && localConfig.type) {
     _config = localConfig;
@@ -95,28 +77,23 @@ export async function initDb() {
   console.log('[DB] No database configured. Shortlink hanya berlaku di browser ini.');
 }
 
-/** Get adapter instance (null if not configured) */
 export function getDb() {
   return _adapter;
 }
 
-/** Whether database is configured and ready */
 export function isDbReady() {
   return _ready && !!_adapter;
 }
 
-/** Get current config */
 export function getDbConfig() {
   return _config;
 }
 
-/** Get database type name */
 export function getDbName() {
   if (!_adapter) return 'None';
   return _adapter.name || _config.type || 'Unknown';
 }
 
-/** Get configured domains list (multi-domain shortlink) */
 export function getDomains() {
   if (_config && Array.isArray(_config.domains) && _config.domains.length > 0) {
     return _config.domains;

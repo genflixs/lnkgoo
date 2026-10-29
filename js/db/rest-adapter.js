@@ -1,8 +1,3 @@
-/* ────────────────────────────────────────────────
-   REST API Adapter (cPanel PHP Proxy)
-   Kompatibel dengan api-proxy.php
-   ──────────────────────────────────────────────── */
-
 export class RestApiAdapter {
   constructor(config) {
     this.apiUrl = (config.apiUrl || config.restApiUrl || '').replace(/\/+$/, '');
@@ -68,7 +63,7 @@ export class RestApiAdapter {
   async incrementClicks(code) {
     try {
       await this.request({ action: 'increment_clicks', code: code });
-    } catch (e) { /* fire-and-forget */ }
+    } catch (e) {   }
   }
 
   async deleteLink(code) {

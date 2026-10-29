@@ -1,17 +1,3 @@
-/**
- * loadVideo — coba memuat video dari daftar upaya dengan strategi bertingkat:
- *
- *  1. Jika ada sourceUrl (format V3) → coba URL tersebut LANGSUNG (prioritas tertinggi)
- *  2. Jika ada cdnKey + cdnPath (format V2) → coba CDN sumber dengan path PENUH
- *  3. Fallback: coba semua CDN dengan filename (segment terakhir)
- *
- * @param {HTMLVideoElement} videoElement
- * @param {object|string} videoInfo — { filename, sourceUrl?, cdnKey?, cdnPath? }
- *        atau string filename (backward compat dengan pemanggilan lama)
- * @param {Array} cdnsArray — daftar CDN { key?, name, base }
- * @param {HTMLElement} statusElement — opsional, untuk update UI status
- * @param {number} timeoutMs — timeout per CDN
- */
 export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, timeoutMs) {
   return new Promise(function(resolve, reject) {
     if (!cdnsArray || cdnsArray.length === 0) {
@@ -19,7 +5,6 @@ export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, tim
       return;
     }
 
-    /* Normalisasi videoInfo —支持 backward compat (string filename lama) */
     var info = videoInfo || {};
     if (typeof videoInfo === 'string') {
       info = { filename: videoInfo };
@@ -34,12 +19,10 @@ export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, tim
       return;
     }
 
-    /* Susun urutan upaya */
     var attempts = [];
 
-    /* Prioritas 1: sourceUrl (format V3) — coba URL lengkap langsung */
     if (sourceUrl) {
-      /* Cari CDN yang match untuk label status */
+
       var sourceCdn = null;
       for (var s = 0; s < cdnsArray.length; s++) {
         try {
@@ -53,7 +36,7 @@ export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, tim
             sourceCdn = cdnsArray[s];
             break;
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {   }
       }
       attempts.push({
         cdn: sourceCdn || { name: 'Source' },
@@ -62,7 +45,6 @@ export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, tim
       });
     }
 
-    /* Prioritas 2: cdnKey + cdnPath (format V2) */
     if (cdnKey && cdnPath) {
       for (var i = 0; i < cdnsArray.length; i++) {
         if (cdnsArray[i].key === cdnKey) {
@@ -78,7 +60,6 @@ export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, tim
       }
     }
 
-    /* Prioritas 3: coba semua CDN dengan filename (fallback) */
     for (var j = 0; j < cdnsArray.length; j++) {
       var cdn3 = cdnsArray[j];
       var url3 = cdn3.base.replace(/\/+$/, '') + '/' + filename.replace(/^\/+/, '');
@@ -89,7 +70,6 @@ export function loadVideo(videoElement, videoInfo, cdnsArray, statusElement, tim
       });
     }
 
-    /* Hilangkan duplikat URL (bisa terjadi bila sourceUrl = CDN+filename) */
     var seenUrls = {};
     var uniqueAttempts = [];
     for (var d = 0; d < attempts.length; d++) {

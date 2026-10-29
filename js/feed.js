@@ -1,12 +1,5 @@
-/* ────────────────────────────────────────────────
-   Streaming Grid Feed (Netflix-style)
-   Fetches videos from DB, decodes k-values,
-   shows poster grid with video thumbnails,
-   click → open player
-   ──────────────────────────────────────────────── */
-
-import { isDbReady, getDb } from './db/index.js?v=58';
-import { decodeKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=58';
+import { isDbReady, getDb } from './db/index.js?v=59';
+import { decodeKValue, decodeLandingKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=59';
 
 var feedLinks = [];
 
@@ -18,7 +11,6 @@ var CDNS = [
   { key: 'xfree',      name: 'Xfree',      base: 'https://cdn.xfree.com' }
 ];
 
-/* ── Render Feed ── */
 export function renderFeed(container, mode) {
   document.body.classList.remove('is-player');
   document.body.classList.add('is-feed');
@@ -108,13 +100,22 @@ async function loadFeedVideos(isTrending) {
       skippedCount++;
       continue;
     }
-    if (!decoded.filename) {
-      /* Smartlink or invalid — skip silently */
+
+    if (decoded.type === 'landing' && decoded.videoKValue) {
+      var landingVideoDecoded = decodeKValue(decoded.videoKValue);
+      if (!landingVideoDecoded || !landingVideoDecoded.filename) {
+        skippedCount++;
+        continue;
+      }
+      decoded = landingVideoDecoded;
+    } else if (decoded.type === 'smartlink') {
+      skippedCount++;
+      continue;
+    } else if (!decoded.filename) {
       skippedCount++;
       continue;
     }
 
-    /* Untuk display filename */
     var displayFilename = decoded.filename;
     if (decoded.sourceUrl) {
       var fnFromSource = getFilenameFromPath(decoded.sourceUrl.replace(/^https?:\/\/[^/]+\//, ''));
@@ -138,6 +139,7 @@ async function loadFeedVideos(isTrending) {
     });
   }
 
+  playerLinks = deduplicateByVideoUrl(playerLinks);
   console.log('[Feed] Player links:', playerLinks.length, '| Skipped:', skippedCount);
 
   if (playerLinks.length === 0) {
@@ -191,6 +193,31 @@ async function loadFeedVideos(isTrending) {
   lazyLoadThumbnails();
 }
 
+function deduplicateByVideoUrl(links) {
+  var seen = {};
+  var unique = [];
+  for (var i = 0; i < links.length; i++) {
+    var link = links[i];
+    var key = link.sourceUrl || link.filename || link.code;
+    if (!key) {
+      unique.push(link);
+      continue;
+    }
+    if (seen[key]) {
+      var existing = seen[key];
+      if ((link.clicks || 0) > (existing.clicks || 0)) {
+        var idx = unique.indexOf(existing);
+        if (idx !== -1) unique[idx] = link;
+        seen[key] = link;
+      }
+    } else {
+      seen[key] = link;
+      unique.push(link);
+    }
+  }
+  return unique;
+}
+
 function getExtension(filename) {
   if (!filename) return 'mp4';
   var parts = filename.split('.');
@@ -214,8 +241,7 @@ function buildCardHTML(item, index, showRank, rank) {
   }
 
   var rankHTML = (showRank && rank) ? '<div class="feed-card-rank">' + rank + '</div>' : '';
-  /* Direct player link — homepage & feed bypass safelink.
-     Shortlink (/?vid=) tetap untuk URL yang di-share externally. */
+
   var playerHref = item.kValue ? ('/?k=' + encodeURIComponent(item.kValue)) : ('/' + escapeHTML(item.code || 'video') + '.' + (item.ext || 'mp4'));
 
   return '<a href="' + playerHref + '" class="feed-card" data-index="' + index + '" data-code="' + escapeHTML(item.code) + '" data-filename="' + escapeHTML(item.filename) + '" data-source-url="' + escapeHTML(item.sourceUrl || '') + '" data-cdn-key="' + escapeHTML(item.cdnKey || '') + '" data-cdn-path="' + escapeHTML(item.cdnPath || '') + '">' +
@@ -260,10 +286,6 @@ function loadCardThumbnail(card) {
   var cdnPath = card.getAttribute('data-cdn-path') || '';
   if (!filename && !sourceUrl && !cdnPath) return;
 
-  /* Susun urutan upaya:
-     1. sourceUrl langsung (V3)
-     2. cdnKey + cdnPath (V2)
-     3. Semua CDN dengan filename (fallback) */
   var attempts = [];
   if (sourceUrl) {
     attempts.push({ url: sourceUrl });
@@ -282,7 +304,6 @@ function loadCardThumbnail(card) {
     attempts.push({ url: url3 });
   }
 
-  /* Hilangkan duplikat */
   var seen = {};
   var unique = [];
   for (var d = 0; d < attempts.length; d++) {

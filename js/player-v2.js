@@ -1,18 +1,6 @@
-import { decodeKValue, getFilenameFromPath } from './utils.js?v=58';
-import { loadVideo } from './cdn-loader.js?v=58';
-import { isDbReady, getDb } from './db/index.js?v=58';
-
-/* =========================================================
-   PLAYER V2 — Native HTML5 Controls
-   =========================================================
-   Same backend logic as player.js (multi-CDN, Popunder,
-   Telegram popup, Histats, smartlink redirect, block seeking)
-   but uses NATIVE browser controls instead of custom UI
-   (matches minimalist screenshot).
-
-   ExoClick ads (VAST preroll, banner, popunder script) have
-   been REMOVED from this build.
-   ========================================================= */
+import { decodeKValue, getFilenameFromPath } from './utils.js?v=59';
+import { loadVideo } from './cdn-loader.js?v=59';
+import { isDbReady, getDb } from './db/index.js?v=59';
 
 const CFG = {
   TELEGRAM_POPUP: {
@@ -23,7 +11,7 @@ const CFG = {
     DESCRIPTION: 'Press continue to keep watching the video.',
     BUTTON_TEXT: 'Continue Watching'
   },
-  /* Popunder (al5sm.com) */
+
   POPUNDER: {
     ENABLED: true,
     ZONE: '10918787',
@@ -49,10 +37,6 @@ const CFG = {
   CDN_TIMEOUT: 5000
 };
 
-
-/* =========================================================
-   HELPERS
-   ========================================================= */
 function escapeHTML(str) {
   if (!str) return '';
   var div = document.createElement('div');
@@ -60,17 +44,12 @@ function escapeHTML(str) {
   return div.innerHTML;
 }
 
-
-/* =========================================================
-   RENDER PLAYER V2
-   ========================================================= */
 export function renderPlayerV2(container, route) {
   document.body.classList.add('is-player-v2');
   document.body.classList.remove('is-player', 'is-feed');
 
   let redirectUrl = CFG.REDIRECT_URL;
 
-  /* HTML — full-screen video with native controls + Telegram popup */
   container.innerHTML =
     '<div class="plr-v2-page" id="plr-v2-page">' +
       '<div class="plr-v2-container" id="plr-v2-container">' +
@@ -85,7 +64,6 @@ export function renderPlayerV2(container, route) {
           'controlsList="nodownload noplaybackrate">' +
         '</video>' +
 
-        /* TELEGRAM POPUP OVERLAY (appears at TRIGGER_TIME seconds = 30s) */
         '<div class="plr-tg-popup" id="plr-v2-tg-popup">' +
           '<div class="plr-tg-box">' +
             '<h3>' + escapeHTML(CFG.TELEGRAM_POPUP.TITLE) + '</h3>' +
@@ -98,19 +76,11 @@ export function renderPlayerV2(container, route) {
     '</div>' +
     '<div class="toast" id="toast"></div>';
 
-
-  /* =========================================================
-     ELEMENTS
-     ========================================================= */
   const containerEl = document.getElementById('plr-v2-container');
   const videoEl = document.getElementById('plr-v2-video');
   const tgPopup = document.getElementById('plr-v2-tg-popup');
   const tgBtn = document.getElementById('plr-v2-tg-btn');
 
-
-  /* =========================================================
-     HISTATS
-     ========================================================= */
   if (CFG.HISTATS.ENABLED) {
     window._Hasync = window._Hasync || [];
     window._Hasync.push(['Histats.start', '1,' + CFG.HISTATS.SITE_ID + ',4,0,0,0,00010000']);
@@ -125,25 +95,17 @@ export function renderPlayerV2(container, route) {
     })();
   }
 
-
-  /* =========================================================
-     DISABLE RIGHT CLICK
-     ========================================================= */
   containerEl.addEventListener('contextmenu', function (e) {
     e.preventDefault();
   });
 
-
-  /* =========================================================
-     BLOCK PLAYBACK RATE — softened (no currentTime reset to prevent restart/buffering) */
   videoEl.addEventListener('ratechange', function () {
     if (videoEl.playbackRate !== 1) {
       videoEl.playbackRate = 1;
-      /* Don't reset currentTime — causes restart/buffering appearance */
+
     }
   });
 
-  /* BLOCK KEYBOARD SEEK / SPEED */
   document.addEventListener('keydown', function (e) {
     if (e.target && e.target.tagName === 'INPUT') return;
     var blockedKeys = ['ArrowLeft', 'ArrowRight', 'Home', 'End', '<', '>', ',', '.'];
@@ -153,7 +115,6 @@ export function renderPlayerV2(container, route) {
     }
   });
 
-  /* Track current time for seek-block + Telegram popup trigger */
   var tgPopupShown = false;
 
   function showTelegramPopup() {
@@ -179,7 +140,6 @@ export function renderPlayerV2(container, route) {
   videoEl.addEventListener('timeupdate', function () {
     videoEl._lastSeekable = videoEl.currentTime;
 
-    /* Telegram popup trigger at TRIGGER_TIME seconds (default 30s) */
     if (
       !tgPopupShown &&
       CFG.TELEGRAM_POPUP.ENABLED &&
@@ -189,10 +149,6 @@ export function renderPlayerV2(container, route) {
     }
   });
 
-
-  /* =========================================================
-     SMARTLINK REDIRECT (on video ended)
-     ========================================================= */
   function doRedirect() {
     if (!CFG.SMARTLINK_REDIRECT.ENABLED) return;
     if (!redirectUrl) return;
@@ -203,13 +159,9 @@ export function renderPlayerV2(container, route) {
     doRedirect();
   });
 
-
-  /* =========================================================
-     POPUNDER (al5sm.com)
-     ========================================================= */
   function injectPopunder() {
     if (!CFG.POPUNDER.ENABLED) return;
-    /* Exact popunder script format from al5sm.com */
+
     (function(s){
       s.dataset.zone = CFG.POPUNDER.ZONE;
       s.src = CFG.POPUNDER.SCRIPT_URL;
@@ -219,10 +171,6 @@ export function renderPlayerV2(container, route) {
 
   injectPopunder();
 
-
-  /* =========================================================
-     INIT
-     ========================================================= */
   (async function init() {
     const kParam = route.kValue;
     const decoded = decodeKValue(kParam) || {};
@@ -249,7 +197,6 @@ export function renderPlayerV2(container, route) {
       if (fnFromPath) filename = fnFromPath;
     }
 
-    /* LOAD VIDEO */
     try {
       var videoInfo = {
         filename: filename,

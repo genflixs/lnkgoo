@@ -1,28 +1,12 @@
-import { getRoute } from './router.js?v=58';
-import { renderGenerator } from './generator.js?v=58';
-import { renderPlayer } from './player.js?v=58';
-import { renderPlayerV2 } from './player-v2.js?v=58';
-import { renderFeed } from './feed.js?v=58';
-import { renderSafelink } from './safelink.js?v=58';
-import { renderLandingPage } from './landing-page.js?v=58';
-import { generateRandomFilename } from './utils.js?v=58';
-import { initDb } from './db/index.js?v=58';
-
-/* ═══════════════════════════════════════════════════════════════
-   Routing:
-
-   /g/                        → Generator page
-   /?k=...                    → Player V1 (custom controls — dari safelink Continue)
-   /?v=...                    → Player V2 (native HTML5 controls — DIRECT link)
-   /?vid=<slug>               → Safelink interstitial (artikel + countdown)
-   /?lp=<encoded-k>           → Landing page (Videy.co style — Output 2 generator)
-                                Setelah safelink countdown, redirect ke sini.
-                                4 button: 1 video + 3 smartlink, posisi di-shuffle
-   /{slug}                    → Shortlink → RENDER SAFELINK LANGSUNG
-                                (tidak ada redirect, URL tetap sama)
-   /?trending=1               → Trending feed
-   /                          → Home feed (videos from DB)
-   ═══════════════════════════════════════════════════════════════ */
+import { getRoute } from './router.js?v=59';
+import { renderGenerator } from './generator.js?v=59';
+import { renderPlayer } from './player.js?v=59';
+import { renderPlayerV2 } from './player-v2.js?v=59';
+import { renderFeed } from './feed.js?v=59';
+import { renderSafelink } from './safelink.js?v=59';
+import { renderLandingPage } from './landing-page.js?v=59';
+import { generateRandomFilename } from './utils.js?v=59';
+import { initDb } from './db/index.js?v=59';
 
 (async function() {
   var app = document.getElementById('app');
@@ -30,55 +14,47 @@ import { initDb } from './db/index.js?v=58';
 
   var pageMode = document.documentElement.getAttribute('data-mode') || 'main';
 
-  /* ── Generator Mode (/g/) ── */
   if (pageMode === 'generator') {
     await initDb();
     renderGenerator(app);
     return;
   }
 
-  /* ── Main Mode ── */
   var dbPromise = initDb();
   var storedRedirect = sessionStorage.getItem('spa_redirect');
   var originalPathAndQuery = storedRedirect || '';
   var route = getRoute();
 
-  /* ── LANDING PAGE (/?lp=<encoded-k>) ──
-     Render halaman landing Videy.co style dengan 4 button:
-     1 button → player V1 (video asli), 3 button → smartlink.
-     Posisi link di-shuffle setiap page load, nama button tetap sama.
-     URL tetap di root dengan ?lp= param (tidak perlu .htaccess rewrite). */
+  if (route.isLandingRedirect) {
+    var getSearch = '?get=' + encodeURIComponent(route.landingSlug);
+    console.log('[App] Landing redirect → /?get=' + route.landingSlug);
+    window.location.href = '/' + getSearch;
+    return;
+  }
+
   if (route.isLanding) {
-    renderLandingPage(app, route.landingKValue);
+    renderLandingPage(app, route.landingSlug);
     dbPromise.catch(function() {});
     return;
   }
 
-  /* ── SAFELINK INTERSTITIAL ──
-     Dua trigger:
-     1. ?vid=slug (eksplisit)
-     2. /{slug} (shortlink — render langsung, tanpa redirect) */
   var safelinkSlug = route.safelinkSlug || route.shortSlug;
   if (safelinkSlug && (route.isSafelink || route.isShortRedirect)) {
-    /* Update URL bar ke /?vid=slug agar refresh tetap aman */
+
     try {
       var vidParam = 'vid=' + encodeURIComponent(safelinkSlug);
       if (window.location.search !== '?' + vidParam) {
         history.replaceState(null, '', '/?' + vidParam);
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) { }
 
     renderSafelink(app, safelinkSlug);
     dbPromise.catch(function() {});
     return;
   }
 
-  /* ---- Check trending query param ---- */
   var isTrending = route.params && route.params.has('trending');
 
-  /* ---- PLAYER (V1 atau V2) ──
-     V1 (?k=) → custom controls
-     V2 (?v=) → native HTML5 controls ── */
   if (route.isPlayer) {
     if (route.playerMode === 'v2') {
       renderPlayerV2(app, route);
@@ -91,13 +67,11 @@ import { initDb } from './db/index.js?v=58';
     return;
   }
 
-  /* ---- HOME or TRENDING → Feed ---- */
   await dbPromise;
   renderFeed(app, isTrending ? 'trending' : 'feed');
 
 })();
 
-/* ── Helper: push fake player V1 URL to address bar ── */
 function pushPlayerUrl(kValue, originalUrl) {
   try {
     if (originalUrl && originalUrl.includes('?k=')) {
@@ -109,7 +83,6 @@ function pushPlayerUrl(kValue, originalUrl) {
   } catch (e) {}
 }
 
-/* ── Helper: push fake player V2 URL to address bar ── */
 function pushPlayerUrlV2(kValue, originalUrl) {
   try {
     if (originalUrl && originalUrl.includes('?v=')) {

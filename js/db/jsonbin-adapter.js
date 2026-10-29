@@ -1,9 +1,3 @@
-/* ────────────────────────────────────────────────
-   JSONBin.io Adapter
-   Free: 10K requests/month, 3 bins
-   Signup: https://jsonbin.io
-   ──────────────────────────────────────────────── */
-
 export class JsonBinAdapter {
   constructor(config) {
     this.apiKey = config.jsonbinApiKey || '';
@@ -12,7 +6,6 @@ export class JsonBinAdapter {
     this.name = 'JSONBin.io';
   }
 
-  /* ---- Internal: read / write entire bin ---- */
   async readBin() {
     if (!this.binId) {
       return this.createBin();
@@ -70,10 +63,8 @@ export class JsonBinAdapter {
       var config = stored ? JSON.parse(stored) : {};
       config.jsonbinBinId = this.binId;
       localStorage.setItem('vgen_db_config', JSON.stringify(config));
-    } catch (e) { /* ignore */ }
+    } catch (e) {   }
   }
-
-  /* ---- Adapter Interface ---- */
 
   async testConnection() {
     if (!this.apiKey) return { ok: false, msg: 'API Key belum diisi' };
@@ -119,6 +110,6 @@ export class JsonBinAdapter {
         }
       }
       await this.writeBin(data);
-    } catch (e) { /* fire-and-forget */ }
+    } catch (e) {   }
   }
 }

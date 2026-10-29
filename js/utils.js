@@ -6,11 +6,6 @@ export function getProtocol() {
   return window.location.protocol.replace(':', '');
 }
 
-/**
- * getRandomDomain(domains) — pilih random domain dari list.
- * @param {string[]} domains - array domain dari db-config.json
- * @returns {string} domain random, atau current hostname jika list kosong
- */
 export function getRandomDomain(domains) {
   if (!domains || domains.length === 0) return getDomain();
   return domains[Math.floor(Math.random() * domains.length)];
@@ -36,15 +31,6 @@ export function extractFilenameFromUrl(input) {
   return decodeURIComponent(last.split('?')[0].split('#')[0]);
 }
 
-/* ────────────────────────────────────────────────────────────
-   CDN Detection & Path Extraction
-   ──────────────────────────────────────────────────────────── */
-
-/**
- * Daftar CDN yang dikenal (key dipakai di k-value).
- * Urutan di sini HANYA untuk definisi; urutan fallback
- * saat load ditentukan oleh cdn-loader.js.
- */
 export const KNOWN_CDNS = [
   { key: 'slicedrive', name: 'Slicedrive', base: 'https://cdn.slicedrive.com' },
   { key: 'videy',      name: 'Videy',      base: 'https://cdn.videy.co' },
@@ -54,17 +40,13 @@ export const KNOWN_CDNS = [
   { key: 'xfree',      name: 'Xfree',      base: 'https://cdn.xfree.com' }
 ];
 
-/**
- * detectCdn(url) — deteksi CDN dari sebuah URL.
- * @returns {object|null} CDN object {key,name,base} atau null jika tidak cocok
- */
 export function detectCdn(input) {
   if (!input || typeof input !== 'string') return null;
   var hostname = '';
   try {
     hostname = new URL(input).hostname.toLowerCase();
   } catch (e) {
-    /* input mungkin path relatif → coba match by base URL substring */
+
     var lower = input.toLowerCase();
     for (var i = 0; i < KNOWN_CDNS.length; i++) {
       if (lower.indexOf(KNOWN_CDNS[i].base.toLowerCase()) !== -1) {
@@ -82,21 +64,10 @@ export function detectCdn(input) {
   return null;
 }
 
-/**
- * extractPathFromUrl(url, cdnBase) — ambil path relatif terhadap cdnBase.
- * Contoh:
- *   ('https://www.xxxfollow.com/media/fans/post_public/0/947/548197.mp4',
- *    'https://www.xxxfollow.com')
- *     → 'media/fans/post_public/0/947/548197.mp4'
- *
- *   ('https://cdn.slicedrive.com/voDWqx8K1.mp4',
- *    'https://cdn.slicedrive.com')
- *     → 'voDWqx8K1.mp4'
- */
 export function extractPathFromUrl(input, cdnBase) {
   if (!input || typeof input !== 'string') return '';
   if (!cdnBase) {
-    /* Fallback: ambil path setelah hostname */
+
     try {
       var u = new URL(input);
       var p = u.pathname.replace(/^\/+/, '');
@@ -106,7 +77,7 @@ export function extractPathFromUrl(input, cdnBase) {
     }
   }
   var base = cdnBase.replace(/\/+$/, '');
-  /* Coba parse sebagai URL absolut */
+
   try {
     var url = new URL(input);
     var baseUrl;
@@ -115,18 +86,14 @@ export function extractPathFromUrl(input, cdnBase) {
       var path = url.pathname.replace(/^\/+/, '');
       return decodeURIComponent(path);
     }
-    /* Host tidak cocok → kembalikan path relatif apa adanya */
+
     return decodeURIComponent(url.pathname.replace(/^\/+/, ''));
   } catch (e2) {
-    /* Input bukan URL absolut → anggap path relatif, trim leading slash */
+
     return input.replace(/^\/+/, '');
   }
 }
 
-/**
- * getFilenameFromPath(path) — ambil segment terakhir dari sebuah path
- * sebagai filename untuk display.
- */
 export function getFilenameFromPath(path) {
   if (!path || typeof path !== 'string') return '';
   var clean = path.split('?')[0].split('#')[0];
@@ -134,8 +101,6 @@ export function getFilenameFromPath(path) {
   if (parts.length === 0) return '';
   return decodeURIComponent(parts[parts.length - 1]);
 }
-
-/* ---- base64url encode / decode ---- */
 
 function btoURLSafe(b64) {
   return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -147,26 +112,6 @@ function fromURLSafe(b64url) {
   return s;
 }
 
-/**
- * generateKValue — encode filename (+ optional source URL) ke base64.
- *
- * Format LAMA (original, backward compat):
- *   filename|rand10|rand6
- *
- * Format V2 (cdnKey + cdnPath, backward compat):
- *   filename|rand10|rand6|cdnKey|cdnRelativePath
- *
- * Format V3 (sourceUrl — RECOMMENDED, paling robust):
- *   filename|rand10|rand6|sourceUrl
- *
- * - filename: nama file display (segment terakhir), mis. "548197.mp4"
- * - sourceUrl: URL LENGKAP file video, mis.
- *   "https://www.xxxfollow.com/media/fans/post_public/0/947/548197.mp4"
- *
- * Jika sourceUrl diberikan → format V3 dipakai (prioritas tertinggi).
- * Jika cdnKey + cdnRelativePath diberikan (tanpa sourceUrl) → format V2.
- * Jika keduanya kosong → format lama (coba semua CDN dengan filename).
- */
 export function generateKValue(realFilename, sourceUrl, cdnKey, cdnRelativePath, playerVersion) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!';
   let rand10 = '';
@@ -179,32 +124,29 @@ export function generateKValue(realFilename, sourceUrl, cdnKey, cdnRelativePath,
   }
   var raw = realFilename + '|' + rand10 + '|' + rand6;
   if (sourceUrl) {
-    /* Format V3 — sourceUrl penuh */
+
     raw += '|' + sourceUrl;
   } else if (cdnKey && cdnRelativePath) {
-    /* Format V2 — cdnKey + cdnRelativePath */
+
     raw += '|' + cdnKey + '|' + cdnRelativePath;
   }
-  /* Add V2 prefix for Player 2 (native controls) — safelink reads this to determine player version */
+
   if (playerVersion === 'v2') {
     raw = 'V2|' + raw;
   }
   return btoa(raw);
 }
 
-/* Encode filename ke URL-safe base64 slug (untuk shortlink path) */
 export function filenameToSlug(filename) {
   if (!filename) return '';
   return btoURLSafe(btoa(filename));
 }
 
-/* Encode full k-value ke URL-safe base64 slug (shortlink random setiap generate) */
 export function kValueToSlug(kValue) {
   if (!kValue) return '';
   return btoURLSafe(kValue);
 }
 
-/* Decode URL-safe base64 slug kembali ke base64 k-value */
 export function slugToK(slug) {
   if (!slug || typeof slug !== 'string') return null;
   try {
@@ -215,45 +157,23 @@ export function slugToK(slug) {
 }
 
 export function generateSmartlinkKValue(url) {
-  /* Add random components so each generate produces unique k-value.
-     This prevents DB duplicate detection (same k-value = same url field = duplicate). */
+
   var rand10 = String(Math.floor(Math.random() * 1e10)).padStart(10, '0');
   var rand6 = Math.random().toString(36).slice(2, 8);
   var raw = 'SMARTLINK|' + rand10 + '|' + rand6 + '|' + url;
   return btoa(raw);
 }
 
-/**
- * generateLandingKValue — k-value khusus untuk landing page (Output 2).
- * Format: LANDING|rand10|rand6|videoKValue
- *
- * videoKValue di sini adalah V1 k-value (filename|rand10|rand6|sourceUrl)
- * yang sudah di-base64. Saat landing page di-load, videoKValue di-decode
- * dan dipakai untuk tombol "video asli" → /?k=<videoKValue>.
- *
- * Penambahan prefix LANDING + random components memastikan:
- * - Setiap generate menghasilkan URL unik (random string berbeda)
- * - K-value ini tidak bentrok dengan k-value V1 player atau SMARTLINK
- * - Decode bisa membedakan: landing page vs player biasa
- */
 export function generateLandingKValue(videoKValue) {
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!';
   var rand10 = '';
-  for (var i = 0; i < 10; i++) {
-    rand10 += Math.floor(Math.random() * 10);
-  }
+  for (var i = 0; i < 10; i++) rand10 += Math.floor(Math.random() * 10);
   var rand6 = '';
-  for (var j = 0; j < 6; j++) {
-    rand6 += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
+  for (var j = 0; j < 6; j++) rand6 += chars.charAt(Math.floor(Math.random() * chars.length));
   var raw = 'LANDING|' + rand10 + '|' + rand6 + '|' + videoKValue;
   return btoa(raw);
 }
 
-/**
- * decodeLandingKValue — pecah k-value landing page menjadi { videoKValue }.
- * Return null jika bukan format landing page.
- */
 export function decodeLandingKValue(k) {
   if (!k || typeof k !== 'string') return null;
   try {
@@ -261,8 +181,6 @@ export function decodeLandingKValue(k) {
     if (!/^[\x20-\x7E]+$/.test(decoded)) return null;
     var parts = decoded.split('|');
     if (parts.length < 4 || parts[0] !== 'LANDING') return null;
-    /* Rejoin bagian terakhir karena videoKValue mungkin mengandung '|' setelah decode?
-       Tidak — videoKValue adalah base64 string (tidak ada '|'). Ambil langsung. */
     var videoKValue = parts.slice(3).join('|');
     if (!videoKValue) return null;
     return { videoKValue: videoKValue };
@@ -275,54 +193,41 @@ export function decodeKValue(k) {
   if (!k || typeof k !== 'string') return { filename: null };
   try {
     const decoded = atob(k);
-    /* Validasi: harus printable ASCII */
+
     if (!/^[\x20-\x7E]+$/.test(decoded)) return { filename: null };
     const parts = decoded.split('|');
     const first = parts[0];
     if (!first) return { filename: null };
 
-    /* Cek format smartlink:
-       New: SMARTLINK|rand10|rand6|url  (4+ parts, URL is last)
-       Old: SMARTLINK|url               (2 parts, URL is parts[1])
-       Compat: SMARTLINK|shopee|omg     (3 parts, URL is parts[2])
-       All formats: URL is the LAST part */
     if (first === 'SMARTLINK' && parts.length >= 2) {
       var smartUrl = parts[parts.length - 1];
       if (smartUrl) return { type: 'smartlink', url: smartUrl };
     }
 
-    /* Cek format LANDING page: LANDING|rand10|rand6|videoKValue
-       Output 2 generator → shortlink → safelink → redirect ke /?lp=<k>
-       Landing page akan decode videoKValue untuk render 4 button. */
     if (first === 'LANDING' && parts.length >= 4) {
       var landingVideoK = parts.slice(3).join('|');
       if (landingVideoK) return { type: 'landing', videoKValue: landingVideoK };
     }
 
-    /* Cek format V2 player: V2|filename|rand10|rand6|sourceUrl
-       Player 2 k-values have V2 prefix so safelink knows to redirect to ?v= */
     if (first === 'V2' && parts.length >= 5 && parts[1]) {
       var v2fn = parts[1];
       if (v2fn.includes('.') && v2fn.length >= 5 && v2fn.length <= 200) {
-        /* V2 + sourceUrl (5 parts: V2|filename|rand10|rand6|sourceUrl) */
+
         if (parts.length === 5 && parts[4] && /^https?:\/\//i.test(parts[4])) {
           return { playerVersion: 'v2', filename: v2fn, sourceUrl: parts[4] };
         }
-        /* V2 + cdnKey+cdnPath (6 parts) */
+
         if (parts.length >= 6 && parts[4] && parts[5]) {
           return { playerVersion: 'v2', filename: v2fn, cdnKey: parts[4], cdnPath: parts[5] };
         }
-        /* V2 + just filename */
+
         return { playerVersion: 'v2', filename: v2fn };
       }
     }
 
-    /* Validasi: harus terlihat seperti filename video */
     if (!first.includes('.')) return { filename: null };
     if (first.length < 5 || first.length > 200) return { filename: null };
 
-    /* Format V3: filename|rand10|rand6|sourceUrl
-       Deteksi: parts.length === 4 DAN parts[3] mulai dengan http:// atau https:// */
     if (parts.length === 4 && parts[3] && /^https?:\/\//i.test(parts[3])) {
       return {
         filename: first,
@@ -330,7 +235,6 @@ export function decodeKValue(k) {
       };
     }
 
-    /* Format V2: filename|rand10|rand6|cdnKey|cdnRelativePath */
     if (parts.length >= 5 && parts[3] && parts[4]) {
       return {
         filename: first,
@@ -339,22 +243,18 @@ export function decodeKValue(k) {
       };
     }
 
-    /* Format lama: filename|rand10|rand6 */
     return { filename: first };
   } catch {
     return { filename: null };
   }
 }
 
-/* Extract slug from a shortlink path.
-   e.g. "/aBcDeF.mp4" → "aBcDeF", "/x/aBcDeF.mp4" → "aBcDeF"
-*/
 export function extractSlugFromPath(path) {
   if (!path) return '';
   var parts = path.split('/').filter(Boolean);
   if (parts.length === 0) return '';
   var last = parts[parts.length - 1];
-  /* remove extension */
+
   var dot = last.lastIndexOf('.');
   if (dot > 0) {
     return last.substring(0, dot);
@@ -452,7 +352,7 @@ export function copyText(text, btnElement) {
     showToast('Berhasil disalin ke clipboard', false);
   }
   function fail() {
-    /* Fallback: hidden textarea + execCommand */
+
     try {
       var ta = document.createElement('textarea');
       ta.value = text;
@@ -463,7 +363,7 @@ export function copyText(text, btnElement) {
       var ok = document.execCommand('copy');
       document.body.removeChild(ta);
       if (ok) { success(); return; }
-    } catch (e) { /* ignore */ }
+    } catch (e) {   }
     showToast('Gagal menyalin ke clipboard', true);
   }
   if (navigator.clipboard && window.isSecureContext) {

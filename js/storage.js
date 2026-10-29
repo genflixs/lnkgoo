@@ -43,7 +43,6 @@ const History = {
   }
 };
 
-/* Mapping random short ID → k-value (untuk shortlink pendek) */
 const ShortStore = {
   get(id) {
     try {
@@ -58,10 +57,10 @@ const ShortStore = {
     try {
       const map = JSON.parse(localStorage.getItem(SHORT_MAP_KEY) || '{}');
       map[id] = kValue;
-      /* Batasi jumlah entry agar localStorage tidak penuh */
+
       const keys = Object.keys(map);
       if (keys.length > MAX_SHORTS) {
-        /* Hapus entry paling lama (first keys) */
+
         var toDelete = keys.length - MAX_SHORTS;
         for (var i = 0; i < toDelete; i++) {
           delete map[keys[i]];
@@ -69,7 +68,7 @@ const ShortStore = {
       }
       localStorage.setItem(SHORT_MAP_KEY, JSON.stringify(map));
     } catch (e) {
-      /* localStorage penuh, coba hapus setengah entry lama */
+
       try {
         const map = JSON.parse(localStorage.getItem(SHORT_MAP_KEY) || '{}');
         const keys = Object.keys(map);
@@ -79,7 +78,7 @@ const ShortStore = {
         }
         map[id] = kValue;
         localStorage.setItem(SHORT_MAP_KEY, JSON.stringify(map));
-      } catch (e2) { /* gagal total, abaikan */ }
+      } catch (e2) {   }
     }
   }
 };

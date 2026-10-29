@@ -1,64 +1,27 @@
-/**
- * Safelink Interstitial (v4 — Auto-direct + Header title + Article image)
- * -----------------------------------------------------------------------
- * Features:
- *   - Pre-fetch k-value from DB (cross-domain)
- *   - Countdown timer (configurable 1-5 seconds)
- *   - Auto-direct ON/OFF (configurable)
- *   - Article title as page header & document.title
- *   - Article image for organic look
- *   - Shuffle button to change article
- */
+import { getRandomArticle } from './safelink-articles.js?v=59';
+import { decodeKValue, slugToK } from './utils.js?v=59';
+import { isDbReady, getDb } from './db/index.js?v=59';
+import { ShortStore } from './storage.js?v=59';
 
-import { getRandomArticle } from './safelink-articles.js?v=58';
-import { decodeKValue, slugToK } from './utils.js?v=58';
-import { isDbReady, getDb } from './db/index.js?v=58';
-import { ShortStore } from './storage.js?v=58';
-
-/* =========================================================
-   CONFIG — EDIT HERE
-   ========================================================= */
 const SAFELINK_CFG = {
-  /* Countdown delay in seconds.
-     - Fixed 2 seconds: { min: 2, max: 2 }
-     - Random 1-5 seconds: { min: 1, max: 5 } */
+
   DELAY: { min: 2, max: 2 },
 
-  /* Continue button text */
   CONTINUE_TEXT: 'Continue to Video',
 
-  /* Auto-redirect after countdown + k-value ready.
-     true  = visitor auto-redirected (no click needed)
-     false = visitor must click Continue button */
   AUTO_REDIRECT: true,
 
-  /* Fallback URL — jika slug tidak ditemukan di DB/localStorage,
-     auto-redirect ke URL ini (biasanya smartlink monetization). */
   FALLBACK_URL: 'https://t.co/qf09zzyREo',
 
-  /* Auto-redirect ke FALLBACK_URL jika link not found.
-     true  = auto-redirect ke smartlink (visitor tidak lihat error)
-     false = tampilkan error message.
-     ── Set ke true sesuai requirement: "apabila ada url not found wajib
-        mengarah ke smartlink" — semua slug yang tidak ditemukan di
-        DB/localStorage auto-redirect ke smartlink (t.co/qf09zzyREo). ── */
   AUTO_FALLBACK_ON_NOT_FOUND: true
 };
 
-
-/* =========================================================
-   STATE
-   ========================================================= */
 var _prefetchedKValue = null;
 var _prefetchError = null;
-var _prefetchNotFound = false;  /* flag: true jika slug tidak ditemukan */
+var _prefetchNotFound = false;
 var _prefetchDone = false;
 var _currentArticle = null;
 
-
-/* =========================================================
-   RENDER SAFELINK PAGE
-   ========================================================= */
 export function renderSafelink(container, slug) {
   document.body.classList.add('is-safelink');
   document.body.classList.remove('is-player', 'is-feed');
@@ -70,39 +33,31 @@ export function renderSafelink(container, slug) {
 
   console.log('[Safelink] Render for slug:', slug);
 
-  /* Reset state */
   _prefetchedKValue = null;
   _prefetchError = null;
   _prefetchNotFound = false;
   _prefetchDone = false;
 
-  /* Pick random article */
   var article = getRandomArticle();
   _currentArticle = article;
   console.log('[Safelink] Article:', article.category, '-', article.title);
 
-  /* Set document title to article title (SEO + tab label) */
   document.title = article.title + ' — VidFlow';
 
-  /* Calculate delay */
   var minDelay = Math.max(1, SAFELINK_CFG.DELAY.min);
   var maxDelay = Math.max(minDelay, SAFELINK_CFG.DELAY.max);
   var delaySec = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
 
-  /* Render page */
   container.innerHTML = buildSafelinkHTML(article, delaySec);
 
-  /* Pre-fetch k-value immediately (background) */
   prefetchKValue(slug);
 
-  /* Setup countdown */
   setupCountdown(delaySec, function() {
     var continueBtn = document.getElementById('safelink-continue');
 
-    /* Cek not-found FIRST — auto-fallback ke smartlink */
     if (_prefetchDone && _prefetchNotFound && SAFELINK_CFG.AUTO_FALLBACK_ON_NOT_FOUND) {
       console.log('[Safelink] Link not found, auto-fallback to:', SAFELINK_CFG.FALLBACK_URL);
-      /* Update UI untuk show redirecting */
+
       if (continueBtn) {
         continueBtn.classList.remove('disabled');
         continueBtn.classList.add('loading');
@@ -117,7 +72,7 @@ export function renderSafelink(container, slug) {
           '<i class="fa-solid fa-circle-check"></i>' +
           '<span class="safelink-status-text">Redirecting...</span>';
       }
-      /* Redirect ke fallback URL */
+
       setTimeout(function() {
         window.location.href = SAFELINK_CFG.FALLBACK_URL;
       }, 500);
@@ -125,12 +80,12 @@ export function renderSafelink(container, slug) {
     }
 
     if (_prefetchDone && _prefetchedKValue) {
-      /* k-value ready → enable Continue + auto-direct if configured */
+
       enableContinueBtn();
 
       if (SAFELINK_CFG.AUTO_REDIRECT) {
         console.log('[Safelink] Auto-redirect enabled, redirecting...');
-        /* Small delay so user sees the "ready" state before redirect */
+
         setTimeout(function() {
           doContinue(slug);
         }, 300);
@@ -138,7 +93,7 @@ export function renderSafelink(container, slug) {
     } else if (_prefetchDone && _prefetchError) {
       showError(_prefetchError);
     } else {
-      /* Prefetch still running — wait */
+
       if (continueBtn) {
         continueBtn.innerHTML =
           '<i class="fa-solid fa-spinner fa-spin"></i> Fetching link...';
@@ -146,7 +101,7 @@ export function renderSafelink(container, slug) {
       var pollTries = 0;
       var pollInterval = setInterval(function() {
         pollTries++;
-        /* Cek not-found di poll juga */
+
         if (_prefetchDone && _prefetchNotFound && SAFELINK_CFG.AUTO_FALLBACK_ON_NOT_FOUND) {
           clearInterval(pollInterval);
           console.log('[Safelink] Link not found (poll), auto-fallback to:', SAFELINK_CFG.FALLBACK_URL);
@@ -178,7 +133,6 @@ export function renderSafelink(container, slug) {
     }
   });
 
-  /* Continue button click handler (for manual click when AUTO_REDIRECT=false) */
   var continueBtn = document.getElementById('safelink-continue');
   if (continueBtn) {
     continueBtn.addEventListener('click', function(e) {
@@ -188,7 +142,6 @@ export function renderSafelink(container, slug) {
     });
   }
 
-  /* Shuffle button */
   var shuffleBtn = document.getElementById('safelink-shuffle');
   if (shuffleBtn) {
     shuffleBtn.addEventListener('click', function(e) {
@@ -199,10 +152,6 @@ export function renderSafelink(container, slug) {
   }
 }
 
-
-/* =========================================================
-   PRE-FETCH k-value
-   ========================================================= */
 async function prefetchKValue(slug) {
   console.log('[Safelink] Pre-fetch k-value for slug:', slug);
 
@@ -212,7 +161,7 @@ async function prefetchKValue(slug) {
     if (kValue) {
       console.log('[Safelink] k-value found in localStorage (same-domain)');
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) {   }
 
   if (!kValue) {
     console.log('[Safelink] localStorage empty, trying DB lookup...');
@@ -252,8 +201,6 @@ async function prefetchKValue(slug) {
     }
   }
 
-  /* Fallback: try base64 decode from slug (k-value encoded in slug path)
-     This makes links work in ANY browser without DB — the k-value IS the slug */
   if (!kValue) {
     try {
       var potentialK = slugToK(slug);
@@ -264,12 +211,12 @@ async function prefetchKValue(slug) {
           console.log('[Safelink] k-value found via base64 decode (slug is k-value)');
         }
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {   }
   }
 
   if (!kValue) {
     _prefetchError = 'Link not found. Slug "' + slug + '" does not exist in database or localStorage.';
-    _prefetchNotFound = true;  /* flag untuk auto-fallback */
+    _prefetchNotFound = true;
     _prefetchDone = true;
     console.warn('[Safelink] Link not found, will auto-fallback to:', SAFELINK_CFG.FALLBACK_URL);
     return;
@@ -282,15 +229,19 @@ async function prefetchKValue(slug) {
     return;
   }
 
+  if (decoded.type === 'landing') {
+    console.log('[Safelink] LANDING type detected — skip countdown, redirect to /?get=' + slug);
+    _prefetchedKValue = kValue;
+    _prefetchDone = true;
+    window.location.href = '/?get=' + encodeURIComponent(slug);
+    return;
+  }
+
   _prefetchedKValue = kValue;
   _prefetchDone = true;
   console.log('[Safelink] Pre-fetch complete. k-value ready.');
 }
 
-
-/* =========================================================
-   ENABLE CONTINUE BUTTON
-   ========================================================= */
 function enableContinueBtn() {
   var continueBtn = document.getElementById('safelink-continue');
   if (!continueBtn) return;
@@ -311,10 +262,6 @@ function enableContinueBtn() {
   }
 }
 
-
-/* =========================================================
-   DO CONTINUE
-   ========================================================= */
 function doContinue(slug) {
   if (!_prefetchedKValue) {
     console.warn('[Safelink] doContinue called but k-value not ready');
@@ -338,20 +285,15 @@ function doContinue(slug) {
     return;
   }
 
-  /* Output 2: k-value LANDING type → redirect ke /?lp=<k-value> (landing page)
-     Landing page akan render 4 button (1 video + 3 smartlink, shuffle posisi).
-     Pakai query param ?lp= di root path supaya tidak perlu .htaccess rewrite
-     (work di cPanel/Apache/GitHub Pages). */
   if (decoded.type === 'landing' && decoded.videoKValue) {
-    var landingTargetUrl = '/?lp=' + encodeURIComponent(_prefetchedKValue);
+    var landingTargetUrl = '/?get=' + encodeURIComponent(slug);
     console.log('[Safelink] Navigate to landing page:', landingTargetUrl);
     window.location.href = landingTargetUrl;
     return;
   }
 
   if (decoded.filename) {
-    /* Check playerVersion in k-value — V2 prefix means redirect to Player V2 (native controls)
-       Otherwise default to Player V1 (custom controls) */
+
     var param = decoded.playerVersion === 'v2' ? 'v' : 'k';
     var playerLabel = decoded.playerVersion === 'v2' ? 'V2 (native)' : 'V1 (custom)';
     var targetUrl = '/?' + param + '=' + encodeURIComponent(_prefetchedKValue);
@@ -363,10 +305,6 @@ function doContinue(slug) {
   showError('Unknown link format.');
 }
 
-
-/* =========================================================
-   SHOW ERROR
-   ========================================================= */
 function showError(msg) {
   console.error('[Safelink] Error:', msg);
   var continueBtn = document.getElementById('safelink-continue');
@@ -389,10 +327,6 @@ function showError(msg) {
   }
 }
 
-
-/* =========================================================
-   HTML BUILDER
-   ========================================================= */
 function buildSafelinkHTML(article, delaySec) {
   var paragraphsHTML = '';
   for (var i = 0; i < article.paragraphs.length; i++) {
@@ -402,7 +336,6 @@ function buildSafelinkHTML(article, delaySec) {
       '</p>';
   }
 
-  /* Article image (organic look) */
   var imageHTML = '';
   if (article.image) {
     imageHTML =
@@ -486,10 +419,6 @@ function buildSafelinkHTML(article, delaySec) {
     '</div>';
 }
 
-
-/* =========================================================
-   COUNTDOWN
-   ========================================================= */
 function setupCountdown(totalSec, onComplete) {
   var numEl = document.getElementById('safelink-countdown-num');
   var ringFg = document.getElementById('safelink-ring-fg');
@@ -529,10 +458,6 @@ function setupCountdown(totalSec, onComplete) {
   requestAnimationFrame(tick);
 }
 
-
-/* =========================================================
-   ERROR RENDER
-   ========================================================= */
 function renderError(container, msg) {
   container.innerHTML =
     '<div class="safelink-page">' +
@@ -545,14 +470,9 @@ function renderError(container, msg) {
     '</div>';
 }
 
-
-/* =========================================================
-   REPLACE ARTICLE (shuffle)
-   ========================================================= */
 function replaceArticle(article) {
   _currentArticle = article;
 
-  /* Update document title */
   document.title = article.title + ' — VidFlow';
 
   var bodyEl = document.getElementById('safelink-article-body');
@@ -566,16 +486,14 @@ function replaceArticle(article) {
       '</p>';
   }
 
-  /* Fade out content, replace, fade in */
   var contentEl = document.querySelector('.safelink-article-content');
   if (contentEl) contentEl.style.opacity = '0';
 
-  /* Fade out image */
   var imageWrap = document.querySelector('.safelink-article-image-wrap');
   if (imageWrap) imageWrap.style.opacity = '0';
 
   setTimeout(function() {
-    /* Update title */
+
     var titleEl = document.querySelector('.safelink-article-title');
     var excerptEl = document.querySelector('.safelink-article-excerpt');
     var catEl = document.querySelector('.safelink-article-cat');
@@ -588,7 +506,6 @@ function replaceArticle(article) {
     if (catBadgeEl) catBadgeEl.innerHTML = '<i class="fa-solid fa-tag"></i> ' + escapeHtml(article.category);
     if (timeEl) timeEl.innerHTML = '<i class="fa-regular fa-clock"></i> ' + escapeHtml(article.readTime);
 
-    /* Update image */
     if (imageWrap && article.image) {
       var img = imageWrap.querySelector('.safelink-article-image');
       if (img) {
@@ -600,19 +517,13 @@ function replaceArticle(article) {
       imageWrap.style.display = 'none';
     }
 
-    /* Update body */
     bodyEl.innerHTML = paragraphsHTML;
 
-    /* Fade in */
     if (contentEl) contentEl.style.opacity = '1';
     if (imageWrap) imageWrap.style.opacity = '1';
   }, 250);
 }
 
-
-/* =========================================================
-   HELPERS
-   ========================================================= */
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
   var div = document.createElement('div');

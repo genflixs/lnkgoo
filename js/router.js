@@ -1,5 +1,5 @@
-import { extractSlugFromPath, slugToK, decodeKValue } from './utils.js?v=58';
-import { ShortStore } from './storage.js?v=58';
+import { extractSlugFromPath, slugToK, decodeKValue } from './utils.js?v=59';
+import { ShortStore } from './storage.js?v=59';
 
 export function getRoute() {
   var stored = sessionStorage.getItem('spa_redirect');
@@ -17,7 +17,6 @@ export function getRoute() {
     }
   }
 
-  /* Fallback: baca langsung dari URL bar (untuk .htaccess / Laragon) */
   if (path === '/') path = window.location.pathname;
   if (!search) search = window.location.search;
 
@@ -27,55 +26,53 @@ export function getRoute() {
   var shortSlug = null;
   var isSafelink = false;
   var safelinkSlug = null;
-  var playerMode = null;  /* 'v1' (custom controls) or 'v2' (native controls) */
+  var playerMode = null;
   var isLanding = false;
-  var landingKValue = null;
+  var landingSlug = null;
+  var isLandingRedirect = false;
 
-  /* Method 0: ?vid=slug — halaman safelink interstitial */
   if (params.has('vid')) {
     isSafelink = true;
     safelinkSlug = params.get('vid');
   }
 
-  /* Method 0b: ?lp=<k-value> — halaman landing page (Videy.co style)
-     Setelah safelink countdown selesai, doContinue() redirect ke /?lp=<k>.
-     Query param di root path → tidak perlu .htaccess rewrite, langsung load
-     index.html → router detect ?lp= → render landing page. */
-  if (!isSafelink && params.has('lp')) {
+  if (!isSafelink && params.has('get')) {
     isLanding = true;
-    landingKValue = params.get('lp') || '';
+    landingSlug = params.get('get') || '';
   }
 
-  /* Method 1a: ?k= query param (player V1 — custom controls) */
-  if (!isSafelink && params.has('k')) {
+  if (!isSafelink && !isLanding && params.has('k')) {
     kValue = params.get('k');
     playerMode = 'v1';
   }
 
-  /* Method 1b: ?v= query param (player V2 — native HTML5 controls) */
-  if (!isSafelink && !kValue && params.has('v')) {
+  if (!isSafelink && !isLanding && !kValue && params.has('v')) {
     kValue = params.get('v');
     playerMode = 'v2';
   }
 
-  /* Method 2: path-based (shortlink) */
   if (!isSafelink && !isLanding && !kValue && path && path !== '/') {
     var slug = extractSlugFromPath(path);
     if (slug && slug.length >= 5) {
       shortSlug = slug;
-      isShortRedirect = true; /* Optimistik: slug 5+ char = potensi shortlink */
+      isShortRedirect = true;
 
-      /* Sync lookup: cek localStorage ShortStore */
       try {
         var storedK = ShortStore.get(slug);
         if (storedK) {
-          kValue = storedK;
-          playerMode = 'v1';  /* shortlink → safelink → player V1 (default) */
+          var testDecoded = decodeKValue(storedK);
+          if (testDecoded && testDecoded.type === 'landing') {
+            isLandingRedirect = true;
+            landingSlug = slug;
+            isShortRedirect = false;
+          } else {
+            kValue = storedK;
+            playerMode = 'v1';
+          }
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) { }
 
-      /* Sync fallback: cek base64 decode (format lama) */
-      if (!kValue) {
+      if (!kValue && !isLandingRedirect) {
         try {
           var potentialK = slugToK(slug);
           if (potentialK) {
@@ -85,7 +82,7 @@ export function getRoute() {
               playerMode = 'v1';
             }
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) { }
       }
     }
   }
@@ -98,10 +95,11 @@ export function getRoute() {
     isSafelink: isSafelink,
     safelinkSlug: safelinkSlug,
     playerMode: playerMode,
-    isGenerator: !isSafelink && !kValue && !isShortRedirect && !isLanding,
-    isPlayer: !!kValue && !isShortRedirect && !isSafelink && !isLanding,
+    isGenerator: !isSafelink && !kValue && !isShortRedirect && !isLanding && !isLandingRedirect,
+    isPlayer: !!kValue && !isShortRedirect && !isSafelink && !isLanding && !isLandingRedirect,
     isShortRedirect: isShortRedirect,
     isLanding: isLanding,
-    landingKValue: landingKValue
+    landingSlug: landingSlug,
+    isLandingRedirect: isLandingRedirect
   };
 }

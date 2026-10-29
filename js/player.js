@@ -1,34 +1,15 @@
-import { decodeKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=58';
-import { loadVideo } from './cdn-loader.js?v=58';
-import { isDbReady, getDb } from './db/index.js?v=58';
+import { decodeKValue, formatTimeAgo, getFilenameFromPath } from './utils.js?v=59';
+import { loadVideo } from './cdn-loader.js?v=59';
+import { isDbReady, getDb } from './db/index.js?v=59';
 
-/* =========================================================
-   CONFIGURATION
-   =========================================================
-   -----------------------------------------------------------------
-   AD / MONETIZATION TOGGLES
-   -----------------------------------------------------------------
-   Set ENABLED: true/false for each ad type to control which ads are
-   shown to visitors.
-
-   ExoClick ads (VAST preroll, banner, download ad, popunder script)
-   have been REMOVED from this build.
-
-   Currently ACTIVE:
-     - POPUNDER (al5sm.com)           : ON  (zone 10918787)
-     - TELEGRAM_POPUP                 : ON  (trigger @ 30s → omg10.com)
-     - SMARTLINK_REDIRECT             : ON  (video end + skip button → omg10.com)
-     - HISTATS (analytics)            : ON
-   ----------------------------------------------------------------- */
 const CFG = {
-  /* Popunder (al5sm.com) — replaces Shuffle Box, fires on user click */
+
   POPUNDER: {
     ENABLED: true,
     ZONE: '10918787',
     SCRIPT_URL: 'https://al5sm.com/tag.min.js'
   },
 
-  /* Telegram popup — visible overlay at TRIGGER_TIME seconds, redirects to smartlink */
   TELEGRAM_POPUP: {
     ENABLED: true,
     TRIGGER_TIME: 30,
@@ -38,27 +19,21 @@ const CFG = {
     BUTTON_TEXT: 'Continue Watching'
   },
 
-  /* Smartlink redirect — fires on (a) video end, (b) skip button (button mode). */
   SMARTLINK_REDIRECT: {
     ENABLED: true,
     URL: 'https://t.co/qf09zzyREo'
   },
 
-  /* Histats analytics (s10.histats.com) */
   HISTATS: {
     ENABLED: true,
     SITE_ID: '4996898'
   },
 
-  /* =========================================================
-     LEGACY FIELDS — kept for backwards compat with existing logic
-     ========================================================= */
   REDIRECT_URL: 'https://t.co/qf09zzyREo',
   MONETIZATION_MODE: 'banner',
   SHOW_SKIP_BTN: false,
   BUTTON_TEXT: 'Click here to watch full video!',
 
-  /* VIDEO CDN — tambahkan field `key` untuk matching dengan k-value */
   VIDEO_CDNS: [
     { key: 'slicedrive', name: 'Slicedrive', base: 'https://cdn.slicedrive.com' },
     { key: 'videy',      name: 'Videy',      base: 'https://cdn2.videy.co' },
@@ -71,10 +46,6 @@ const CFG = {
   CDN_TIMEOUT: 5000
 };
 
-
-/* =========================================================
-   HELPERS
-   ========================================================= */
 function formatTime(sec) {
   if (!sec || !isFinite(sec)) return '0:00';
 
@@ -93,10 +64,6 @@ function escapeHTML(str) {
   return div.innerHTML;
 }
 
-
-/* =========================================================
-   RENDER PLAYER
-   ========================================================= */
 export function renderPlayer(container, route) {
   document.body.classList.add('is-player');
   document.body.classList.remove('is-feed');
@@ -105,10 +72,6 @@ export function renderPlayer(container, route) {
   let redirectUrl = CFG.REDIRECT_URL;
   let controlsTimer = null;
 
-
-  /* =========================================================
-     PLAYER HTML
-     ========================================================= */
   container.innerHTML =
     '<div class="plr-page" id="plr-page">' +
 
@@ -127,12 +90,10 @@ export function renderPlayer(container, route) {
             'controlsList="nodownload noplaybackrate">' +
           '</video>' +
 
-          /* BIG PLAY BUTTON (center, shown when paused) */
           '<button class="plr-big-play" id="plr-big-play" type="button">' +
             '<i class="fa-solid fa-play"></i>' +
           '</button>' +
 
-          /* CONTROLS — bottom bar (progress + buttons row) */
           '<div class="plr-controls" id="plr-controls">' +
 
             '<div class="plr-progress-wrap">' +
@@ -167,11 +128,8 @@ export function renderPlayer(container, route) {
 
           '</div>' +
 
-          /* MONETIZATION AREA — kept as a placeholder
-             (ExoClick banner removed; wrap is empty by default). */
           '<div class="plr-monetization-wrap" id="plr-monetization-wrap"></div>' +
 
-          /* TELEGRAM POPUP OVERLAY (appears at TRIGGER_TIME seconds = 30s) */
           '<div class="plr-tg-popup" id="plr-tg-popup">' +
             '<div class="plr-tg-box">' +
               '<h3>' + escapeHTML(CFG.TELEGRAM_POPUP.TITLE) + '</h3>' +
@@ -180,7 +138,6 @@ export function renderPlayer(container, route) {
             '</div>' +
           '</div>' +
 
-          /* SKIP BUTTON MODE */
           '<button class="plr-skip" id="plr-skip">' +
             '<i class="fa-solid fa-play"></i> ' +
             '<span>' + escapeHTML(CFG.BUTTON_TEXT) + '</span>' +
@@ -190,7 +147,6 @@ export function renderPlayer(container, route) {
 
       '</div>' +
 
-      /* RECOMMENDED */
       '<div class="plr-rec-section" id="plr-rec-section">' +
 
         '<div class="plr-rec-title">' +
@@ -209,10 +165,6 @@ export function renderPlayer(container, route) {
 
     '<div class="toast" id="toast"></div>';
 
-
-  /* =========================================================
-     ELEMENTS
-     ========================================================= */
   const containerEl = document.getElementById('plr-container');
   const videoEl = document.getElementById('plr-video');
   const skipBtn = document.getElementById('plr-skip');
@@ -223,7 +175,6 @@ export function renderPlayer(container, route) {
   const timeDisplay = document.getElementById('plr-time');
   const monetizationWrap = document.getElementById('plr-monetization-wrap');
 
-  /* Standard UI elements */
   const bigPlayBtn = document.getElementById('plr-big-play');
   const progressBar = document.getElementById('plr-progress');
   const progressFilled = document.getElementById('plr-progress-filled');
@@ -231,10 +182,6 @@ export function renderPlayer(container, route) {
   const tgPopup = document.getElementById('plr-tg-popup');
   const tgBtn = document.getElementById('plr-tg-btn');
 
-
-  /* =========================================================
-     HISTATS
-     ========================================================= */
   if (CFG.HISTATS.ENABLED) {
     window._Hasync = window._Hasync || [];
     window._Hasync.push(['Histats.start', '1,' + CFG.HISTATS.SITE_ID + ',4,0,0,0,00010000']);
@@ -254,18 +201,10 @@ export function renderPlayer(container, route) {
     })();
   }
 
-
-  /* =========================================================
-     DISABLE RIGHT CLICK
-     ========================================================= */
   containerEl.addEventListener('contextmenu', function (e) {
     e.preventDefault();
   });
 
-
-  /* =========================================================
-     CONTROLS
-     ========================================================= */
   function showControls() {
     controlsEl.classList.add('visible');
 
@@ -286,10 +225,6 @@ export function renderPlayer(container, route) {
     { passive: true }
   );
 
-
-  /* =========================================================
-     PLAY / PAUSE
-     ========================================================= */
   function updatePPIcon() {
     var icon = btnPP.querySelector('i');
 
@@ -315,9 +250,6 @@ export function renderPlayer(container, route) {
   videoEl.addEventListener('play', updatePPIcon);
   videoEl.addEventListener('pause', updatePPIcon);
 
-  /* =========================================================
-     BIG PLAY BUTTON (center, shown when paused)
-     ========================================================= */
   function showBigPlay() {
     if (bigPlayBtn) bigPlayBtn.classList.add('visible');
   }
@@ -344,10 +276,6 @@ export function renderPlayer(container, route) {
     if (!videoEl.paused) hideBigPlay();
   });
 
-
-  /* =========================================================
-     VOLUME
-     ========================================================= */
   function updateVolIcon() {
     var icon = btnVol.querySelector('i');
 
@@ -385,10 +313,6 @@ export function renderPlayer(container, route) {
     e.stopPropagation();
   });
 
-
-  /* =========================================================
-     FULLSCREEN (cross-device — including iOS Safari)
-     ========================================================= */
   const fsBtn = document.getElementById('plr-fs-btn');
 
   function isFullscreenActive() {
@@ -401,7 +325,7 @@ export function renderPlayer(container, route) {
   }
 
   function enterFullscreen() {
-    /* 1. Standard Fullscreen API on container (desktop + Android) */
+
     var req = containerEl.requestFullscreen ||
               containerEl.webkitRequestFullscreen ||
               containerEl.webkitRequestFullScreen ||
@@ -412,7 +336,7 @@ export function renderPlayer(container, route) {
         var p = req.call(containerEl);
         if (p && p.catch) {
           p.catch(function () {
-            /* Fallback: iOS — only video element can go fullscreen */
+
             if (videoEl && videoEl.webkitEnterFullscreen) {
               try { videoEl.webkitEnterFullscreen(); } catch (e) {}
             }
@@ -420,11 +344,10 @@ export function renderPlayer(container, route) {
         }
         return;
       } catch (e) {
-        /* fall through to iOS fallback */
+
       }
     }
 
-    /* 2. iOS Safari — only video element can go fullscreen */
     if (videoEl && videoEl.webkitEnterFullscreen) {
       try { videoEl.webkitEnterFullscreen(); } catch (e) {}
     }
@@ -473,20 +396,12 @@ export function renderPlayer(container, route) {
     videoEl.addEventListener('webkitpresentationmodechanged', updateFsIcon);
   }
 
-
-  /* =========================================================
-     BLOCK SEEKING
-     ========================================================= */
   videoEl.addEventListener('seeking', function () {
     if (videoEl._lastSeekable !== undefined) {
       videoEl.currentTime = videoEl._lastSeekable;
     }
   });
 
-
-  /* =========================================================
-     BLOCK PLAYBACK RATE
-     ========================================================= */
   videoEl.addEventListener('ratechange', function () {
     if (videoEl.playbackRate !== 1) {
       videoEl.playbackRate = 1;
@@ -498,10 +413,6 @@ export function renderPlayer(container, route) {
     }
   });
 
-
-  /* =========================================================
-     BLOCK KEYBOARD SEEK / SPEED
-     ========================================================= */
   document.addEventListener('keydown', function (e) {
     if (e.target && e.target.tagName === 'INPUT') {
       return;
@@ -524,11 +435,6 @@ export function renderPlayer(container, route) {
     }
   });
 
-
-  /* =========================================================
-     TIME DISPLAY + PROGRESS BAR
-     (display-only — seeking intentionally blocked by existing handler)
-     ========================================================= */
   function updateProgress() {
     if (!progressFilled || !videoEl.duration) return;
     var pct = (videoEl.currentTime / videoEl.duration) * 100;
@@ -558,7 +464,6 @@ export function renderPlayer(container, route) {
 
     updateProgress();
 
-    /* Telegram popup trigger at TRIGGER_TIME seconds (default 30s) */
     if (
       !tgPopupShown &&
       CFG.TELEGRAM_POPUP.ENABLED &&
@@ -578,23 +483,14 @@ export function renderPlayer(container, route) {
 
   videoEl.addEventListener('progress', updateBuffered);
 
-
-  /* =========================================================
-     SMARTLINK REDIRECT
-     ========================================================= */
   function doRedirect() {
-    /* No-op when SMARTLINK_REDIRECT is disabled */
+
     if (!CFG.SMARTLINK_REDIRECT.ENABLED) return;
     if (!redirectUrl) return;
 
     window.location.href = redirectUrl;
   }
 
-
-  /* =========================================================
-     TELEGRAM POPUP — appears after TRIGGER_TIME seconds of playback
-     Video auto-pauses when popup appears. Button redirects to smartlink.
-     ========================================================= */
   var tgPopupShown = false;
 
   function showTelegramPopup() {
@@ -617,23 +513,15 @@ export function renderPlayer(container, route) {
     });
   }
 
-
-  /* =========================================================
-     BUTTON
-     ========================================================= */
   function triggerButton() {
     if (btnShown) return;
-    /* Don't show skip button if SMARTLINK_REDIRECT is disabled (no target) */
+
     if (!CFG.SMARTLINK_REDIRECT.ENABLED) return;
 
     btnShown = true;
     skipBtn.classList.add('visible');
   }
 
-
-  /* =========================================================
-     GET MODE
-     ========================================================= */
   function getMonetizationMode() {
     var mode = String(
       CFG.MONETIZATION_MODE || ''
@@ -644,10 +532,6 @@ export function renderPlayer(container, route) {
       : 'button';
   }
 
-
-  /* =========================================================
-     SETUP MONETIZATION
-     ========================================================= */
   function setupMonetization() {
     var mode = getMonetizationMode();
 
@@ -669,15 +553,12 @@ export function renderPlayer(container, route) {
       return;
     }
 
-    /* BANNER MODE — banner removed; just hide skip button. */
     skipBtn.style.display = 'none';
   }
 
-
-  /* Inject Popunder (al5sm.com) — replaces Shuffle Box, fires on user click */
   function injectPopunder() {
     if (!CFG.POPUNDER.ENABLED) return;
-    /* Exact popunder script format from al5sm.com */
+
     (function(s){
       s.dataset.zone = CFG.POPUNDER.ZONE;
       s.src = CFG.POPUNDER.SCRIPT_URL;
@@ -685,17 +566,9 @@ export function renderPlayer(container, route) {
     console.log('[Popunder] Loaded zone', CFG.POPUNDER.ZONE);
   }
 
-
-  /* =========================================================
-     INITIALIZE MONETIZATION
-     ========================================================= */
   setupMonetization();
   injectPopunder();
 
-
-  /* =========================================================
-     RECOMMENDATIONS
-     ========================================================= */
   function loadRecommendations(currentFilename) {
     var recGrid =
       document.getElementById('plr-rec-grid');
@@ -733,10 +606,7 @@ export function renderPlayer(container, route) {
             decoded.filename &&
             decoded.filename !== currentFilename
           ) {
-            /* Untuk display filename:
-               - V3 (sourceUrl): pakai segment terakhir dari sourceUrl
-               - V2 (cdnPath): pakai segment terakhir dari cdnPath
-               - V1 (filename): pakai filename langsung */
+
             var displayFilename = decoded.filename;
             if (decoded.sourceUrl) {
               var fnFromSource = getFilenameFromPath(decoded.sourceUrl.replace(/^https?:\/\/[^/]+\//, ''));
@@ -747,7 +617,7 @@ export function renderPlayer(container, route) {
             }
             items.push({
               filename: displayFilename,
-              kValue: link.url,  /* k-value untuk direct player link */
+              kValue: link.url,
               sourceUrl: decoded.sourceUrl || '',
               cdnKey: decoded.cdnKey || '',
               cdnPath: decoded.cdnPath || '',
@@ -785,7 +655,6 @@ export function renderPlayer(container, route) {
       });
   }
 
-
   function buildRecCard(item, index) {
     var titleText =
       item.filename.replace(/\.[^.]+$/, '');
@@ -795,8 +664,6 @@ export function renderPlayer(container, route) {
         titleText.substring(0, 40) + '...';
     }
 
-    /* Direct player link — recommendations bypass safelink.
-       Shortlink (/?vid=) tetap untuk URL yang di-share externally. */
     var href = item.kValue
       ? ('/?k=' + encodeURIComponent(item.kValue))
       : ('/' + escapeHTML(item.code || 'video') + '.' + (item.ext || 'mp4'));
@@ -865,10 +732,6 @@ export function renderPlayer(container, route) {
     );
   }
 
-
-  /* =========================================================
-     LAZY LOAD THUMBNAILS
-     ========================================================= */
   function lazyLoadRecThumbnails(recContainer) {
     var cards =
       recContainer.querySelectorAll(
@@ -899,7 +762,6 @@ export function renderPlayer(container, route) {
     });
   }
 
-
   function loadRecCardThumbnail(card) {
     var thumbEl =
       card.querySelector('.feed-card-thumb');
@@ -922,10 +784,6 @@ export function renderPlayer(container, route) {
 
     if (!filename && !sourceUrl && !cdnPath) return;
 
-    /* Susun urutan upaya:
-       1. sourceUrl langsung (V3)
-       2. cdnKey + cdnPath (V2)
-       3. Semua CDN dengan filename (fallback) */
     var attempts = [];
     if (sourceUrl) {
       attempts.push({ url: sourceUrl });
@@ -944,7 +802,6 @@ export function renderPlayer(container, route) {
       attempts.push({ url: url3 });
     }
 
-    /* Hilangkan duplikat */
     var seen = {};
     var unique = [];
     for (var d = 0; d < attempts.length; d++) {
@@ -1021,7 +878,7 @@ export function renderPlayer(container, route) {
           thumbEl.classList.add('thumb-loaded');
 
         } catch (e) {
-          /* CORS fallback */
+
           thumbEl.innerHTML = '';
           thumbEl.classList.add('thumb-loaded');
         }
@@ -1041,10 +898,6 @@ export function renderPlayer(container, route) {
     tryNext();
   }
 
-
-  /* =========================================================
-     HELPERS
-     ========================================================= */
   function getExt(filename) {
     if (!filename) return 'mp4';
 
@@ -1071,10 +924,6 @@ export function renderPlayer(container, route) {
     return String(n);
   }
 
-
-  /* =========================================================
-     INIT
-     ========================================================= */
   (async function init() {
     const kParam = route.kValue;
 
@@ -1084,13 +933,12 @@ export function renderPlayer(container, route) {
     let filename =
       decoded.filename;
 
-    /* sourceUrl (format V3 — URL lengkap), cdnKey+cdnPath (format V2) */
     var sourceUrl = decoded.sourceUrl || '';
     var cdnKey = decoded.cdnKey || '';
     var cdnPath = decoded.cdnPath || '';
 
     if (!filename) {
-      /* Jika ada sourceUrl, ekstrak filename dari sana */
+
       if (sourceUrl) {
         try {
           var u = new URL(sourceUrl);
@@ -1098,19 +946,16 @@ export function renderPlayer(container, route) {
           if (parts.length > 0) {
             filename = decodeURIComponent(parts[parts.length - 1].split('?')[0]);
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {   }
       }
       if (!filename) filename = CFG.FALLBACK;
     }
 
-    /* Jika ada cdnPath, pastikan filename display = segment terakhir */
     if (!sourceUrl && cdnPath) {
       var fnFromPath = getFilenameFromPath(cdnPath);
       if (fnFromPath) filename = fnFromPath;
     }
 
-
-    /* BUTTON CLICK */
     skipBtn.addEventListener(
       'click',
       function (e) {
@@ -1119,8 +964,6 @@ export function renderPlayer(container, route) {
       }
     );
 
-
-    /* VIDEO ENDED → SMARTLINK */
     videoEl.addEventListener(
       'ended',
       function () {
@@ -1128,12 +971,8 @@ export function renderPlayer(container, route) {
       }
     );
 
-
-    /* LOAD RECOMMENDATIONS */
     loadRecommendations(filename);
 
-
-    /* LOAD VIDEO - prioritas: sourceUrl > cdnKey+cdnPath > filename fallback */
     try {
       var videoInfo = {
         filename: filename,

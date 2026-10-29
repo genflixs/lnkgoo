@@ -1,24 +1,5 @@
-/**
- * Safelink Articles Pool (English — Latest Tech News)
- * ----------------------------------------------------
- * Pool of organic English articles about latest news in:
- *   - AI tools & models
- *   - Video platforms & streaming
- *   - Mobile apps
- *   - Developer tools
- *   - Tech industry news
- *
- * Articles are displayed randomly on the safelink interstitial
- * page during the countdown. Each article has:
- *   - category
- *   - title
- *   - excerpt (short summary)
- *   - paragraphs[] (article body, multiple paragraphs)
- *   - readTime (estimated read time, "X min read")
- */
-
 export const SAFELINK_ARTICLES = [
-  /* ─── 1. AI Tools ─── */
+
   {
     category: 'AI Tools',
 
@@ -35,7 +16,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 2. Video Platforms ─── */
   {
     category: 'Video Platforms',
 
@@ -52,7 +32,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '3 min read'
   },
 
-  /* ─── 3. Mobile Apps ─── */
   {
     category: 'Mobile Apps',
 
@@ -69,7 +48,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 4. AI Models ─── */
   {
     category: 'AI Models',
 
@@ -86,7 +64,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '5 min read'
   },
 
-  /* ─── 5. Developer Tools ─── */
   {
     category: 'Developer Tools',
 
@@ -103,7 +80,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 6. Streaming News ─── */
   {
     category: 'Streaming News',
 
@@ -120,7 +96,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '3 min read'
   },
 
-  /* ─── 7. Tech Industry ─── */
   {
     category: 'Tech Industry',
 
@@ -137,7 +112,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '5 min read'
   },
 
-  /* ─── 8. Social Media ─── */
   {
     category: 'Social Media',
 
@@ -154,7 +128,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 9. AI Research ─── */
   {
     category: 'AI Research',
 
@@ -171,7 +144,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '5 min read'
   },
 
-  /* ─── 10. Gaming News ─── */
   {
     category: 'Gaming News',
 
@@ -188,7 +160,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 11. Hardware News ─── */
   {
     category: 'Hardware News',
 
@@ -205,7 +176,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 12. App Updates ─── */
   {
     category: 'App Updates',
 
@@ -222,7 +192,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '3 min read'
   },
 
-  /* ─── 13. Cybersecurity ─── */
   {
     category: 'Cybersecurity',
 
@@ -239,7 +208,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '5 min read'
   },
 
-  /* ─── 14. Productivity Apps ─── */
   {
     category: 'Productivity Apps',
 
@@ -256,7 +224,6 @@ export const SAFELINK_ARTICLES = [
     readTime: '4 min read'
   },
 
-  /* ─── 15. Virtual Reality ─── */
   {
     category: 'Virtual Reality',
 
@@ -274,11 +241,6 @@ export const SAFELINK_ARTICLES = [
   }
 ];
 
-/**
- * getRandomArticle — pick a random article from the pool.
- * @param {string} [excludeTitle] — title to exclude (optional, for shuffle)
- * @returns {object} article {category, title, excerpt, paragraphs, readTime}
- */
 export function getRandomArticle(excludeTitle) {
   var pool = SAFELINK_ARTICLES;
   if (excludeTitle) {
